@@ -1,1 +1,23 @@
-spring.application.name=swyp-hobbi-back
+spring :
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/your_db_name
+    username: your_username
+    password: your_password
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQLDialect
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  jwt:
+    secret: your-secret-key
+    expiration: 3600000
