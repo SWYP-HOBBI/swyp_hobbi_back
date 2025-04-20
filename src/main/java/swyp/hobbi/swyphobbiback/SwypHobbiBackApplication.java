@@ -1,4 +1,4 @@
-package org.example.swyphobbiback;
+package swyp.hobbi.swyphobbiback;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
