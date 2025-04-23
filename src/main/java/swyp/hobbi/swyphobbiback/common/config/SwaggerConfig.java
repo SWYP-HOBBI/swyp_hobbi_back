@@ -40,4 +40,21 @@ public class SwaggerConfig {
                 )
                 .build();
     }
+
+    @Bean
+    public GroupedOpenApi emailGroupedOpenApi() {
+        return GroupedOpenApi.builder()
+                .group("email")
+                .pathsToMatch("/api/v1/email/**")
+                .addOpenApiCustomizer(
+                        openApi ->
+                                openApi.setInfo(
+                                        new Info()
+                                                .title("email api")
+                                                .description("이메일 관련 API")
+                                                .version("0.0.1")
+                                )
+                )
+                .build();
+    }
 }
