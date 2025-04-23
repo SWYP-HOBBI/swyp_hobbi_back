@@ -1,9 +1,9 @@
 spring :
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/your-database-name
-    username: your_username
-    password: your_password
+    url: jdbc:mysql://localhost:3306/hobbi
+    username: root
+    password: 1234
 
   data:
     redis:
@@ -15,9 +15,16 @@ spring :
     database-platform: org.hibernate.dialect.MySQLDialect
     generate-ddl: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     show-sql: true
 
-  jwt:
-    secret: your-secret-key
-    expiration: 3600000
+jwt:
+  secret: your-secret-key
+  expiration: 3600000
+
+ncp:
+  storage:
+    region: kr-standard
+    endpoint: https://kr.object.ncloudstorage.com
+    accessKey: ncp_iam_BPAMKR2vSx9ZdOU07LKK
+    secretKey: ncp_iam_BPKMKRKt7vCaDIa1vUK47okLqUqAijI2ks
