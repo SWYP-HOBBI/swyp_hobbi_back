@@ -21,12 +21,12 @@ public class EmailVerificationService {
         //System.out.println("EmailToken >> " + token);
         String link = "http://localhost:8080/api/v1/email/verify?token=" + token; //인증 링크 생성
 
-        EmailVerification emailVerification = EmailVerification.builder()
-                .email(email)
-                .token(token)
-                .verified(false)
-                .expiresAt(LocalDateTime.now().plusMinutes(5)) //인증 만료 시간 5분
-                .build();
+        EmailVerification emailVerification = emailVerificationRepository.findByEmail(email)
+                .orElse(EmailVerification.builder().email(email).build());
+
+        emailVerification.setToken(token);
+        emailVerification.setVerified(false);
+        emailVerification.setExpiresAt(LocalDateTime.now().plusMinutes(3)); //인증 만료 시간 3분
 
         emailVerificationRepository.save(emailVerification);
 
