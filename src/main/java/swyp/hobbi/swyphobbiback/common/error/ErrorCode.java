@@ -13,7 +13,8 @@ public enum ErrorCode {
     COMMENT_NOT_FOUND(404, "COMMENT_NOT_FOUND", "댓글을 찾을 수 없습니다."),
 
     // 5xx
-    INTERNAL_SERVER_ERROR(500, "INTERNAL_SERVER_ERROR","서버 에러가 발생했습니다.");
+    INTERNAL_SERVER_ERROR(500, "INTERNAL_SERVER_ERROR","서버 에러가 발생했습니다."),
+    FAILED_TO_UPLOAD_FILE(500, "FAILED_TO_UPLOAD_FILE", "파일 업로드에 실패하였습니다.");
 
     private final int status;
     private final String code;

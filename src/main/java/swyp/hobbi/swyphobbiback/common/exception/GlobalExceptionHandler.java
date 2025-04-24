@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
 import swyp.hobbi.swyphobbiback.common.error.ErrorResponse;
 
+import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 
@@ -107,6 +108,17 @@ public class GlobalExceptionHandler {
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorCode(ErrorCode.INTERNAL_SERVER_ERROR)
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(FileUploadFailedException.class)
+    public ResponseEntity<ErrorResponse> handleFileUploadFailedException(FileUploadFailedException ex) {
+        log.error("IOException : {}", ex.getMessage());
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode(ErrorCode.FAILED_TO_UPLOAD_FILE)
                 .build();
 
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
