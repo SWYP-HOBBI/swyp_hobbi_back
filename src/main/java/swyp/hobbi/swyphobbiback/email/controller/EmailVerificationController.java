@@ -49,7 +49,12 @@ public class EmailVerificationController {
                 .map(EmailVerification::isVerified)
                 .orElse(false);
 
-        return ResponseEntity.ok(new EmailCheckResponse(isVerified));
+        String message = isVerified
+                ? "이메일 인증이 완료되었습니다."
+                : "이메일 인증이 완료되지 않았습니다.";
+
+
+        return ResponseEntity.ok(new EmailCheckResponse(message));
 
     }
 }
