@@ -15,9 +15,10 @@ public enum ErrorCode {
     USER_NOT_FOUND(404, "USER_NOT_FOUND","사용자를 찾을 수 없습니다."),
     POST_NOT_FOUND(404, "POST_NOT_FOUND","게시글을 찾을 수 없습니다."),
     COMMENT_NOT_FOUND(404, "COMMENT_NOT_FOUND", "댓글을 찾을 수 없습니다."),
+    IMAGE_NOT_FOUND(404, "IMAGE_NOT_FOUND", "이미지를 찾을 수 없습니다."),
+
     EMAIL_ALREADY_EXISTS(409, "EMAIL_ALREADY_EXISTS", "이미 존재하는 이메일입니다."),
     NICKNAME_ALREADY_EXISTS(409, "NICKNAME_ALREADY_EXISTS", "이미 존재하는 닉네임입니다."),
-
 
     // 5xx
     INTERNAL_SERVER_ERROR(500, "INTERNAL_SERVER_ERROR","서버 에러가 발생했습니다."),
