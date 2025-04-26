@@ -29,6 +29,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
+                .cors(cors -> {}) // CORS 따로 관리
                 .csrf(csrf -> csrf.disable()) // CSRF 끄기 (토큰이므로)
                 .formLogin(login -> login.disable()) // form 로그인 페이지 제거
                 .httpBasic(basic -> basic.disable()) // Basic 인증 제거
