@@ -1,7 +1,8 @@
 spring :
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/testDB
+    url: jdbc:mysql://localhost:3306/hobbi
+
     username: root
     password: 1234
 
@@ -34,6 +35,7 @@ spring :
           timeout: 5000
           writetimeout: 5000
 
+
 jwt:
   secret: your-secret-key
   expiration: 3600000
@@ -50,3 +52,5 @@ logging:
     org:
       springframework:
         security: DEBUG
+    secretKey: ncp_iam_BPKMKRKt7vCaDIa1vUK47okLqUqAijI2ks
+
