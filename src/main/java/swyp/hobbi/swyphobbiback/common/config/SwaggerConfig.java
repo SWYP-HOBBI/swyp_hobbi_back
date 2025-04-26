@@ -57,4 +57,21 @@ public class SwaggerConfig {
                 )
                 .build();
     }
+
+    @Bean
+    public GroupedOpenApi authGroupedOpenApi() {
+        return GroupedOpenApi.builder()
+                .group("token")
+                .pathsToMatch("/api/v1/token/**")
+                .addOpenApiCustomizer(
+                        openApi ->
+                                openApi.setInfo(
+                                        new Info()
+                                                .title("token api")
+                                                .description("토큰 관련 API")
+                                                .version("0.0.1")
+                                )
+                )
+                .build();
+    }
 }
