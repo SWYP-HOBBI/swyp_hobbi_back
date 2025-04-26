@@ -2,7 +2,7 @@ package swyp.hobbi.swyphobbiback.hobbytag.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import swyp.hobbi.swyphobbiback.posthobbytag.domain.PostHobbyTag;
+import swyp.hobbi.swyphobbiback.user.domain.UserHobbyTag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,4 +26,7 @@ public class HobbyTag {
 
 //    @OneToMany(mappedBy = "hobbyTag", cascade = CascadeType.ALL, orphanRemoval = true)
 //    private List<PostHobbyTag> postHobbyTags = new ArrayList<>();
+
+    @OneToMany(mappedBy = "hobbyTag", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserHobbyTag> userHobbyTags = new ArrayList<>();
 }
