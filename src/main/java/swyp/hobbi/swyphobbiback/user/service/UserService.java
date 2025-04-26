@@ -3,6 +3,7 @@ package swyp.hobbi.swyphobbiback.user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import swyp.hobbi.swyphobbiback.common.exception.UserNotFoundException;
 import swyp.hobbi.swyphobbiback.token.dto.TokenPair;
 import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
 import swyp.hobbi.swyphobbiback.common.exception.CustomException;
@@ -76,7 +77,7 @@ public class UserService {
 
     public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(UserNotFoundException::new);
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new CustomException(ErrorCode.PASSWORD_NOT_MATCH);
