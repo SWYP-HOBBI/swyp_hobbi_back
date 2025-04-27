@@ -31,7 +31,7 @@ public class UserService {
 
     public UserResponse signUp(UserCreateRequest request) {
 
-        if (!emailVerificationRepository.findByEmail(request.getEmail()).map(EmailVerification::isVerified).orElse(false)) {
+        if (!emailVerificationRepository.findByEmail(request.getEmail()).map(EmailVerification::getVerified).orElse(false)) {
             throw new CustomException(ErrorCode.EMAIL_NOT_VERIFIED);
         }
 
