@@ -46,7 +46,7 @@ public class EmailVerificationController {
         String email = request.getEmail();
 
         boolean isVerified = emailVerificationRepository.findByEmail(email)
-                .map(EmailVerification::isVerified)
+                .map(EmailVerification::getVerified)
                 .orElse(false);
 
         String message = isVerified

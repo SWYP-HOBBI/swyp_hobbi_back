@@ -36,13 +36,13 @@ public class User {
     private String nickname;
 
     @Column(nullable = false)
-    private int birthYear;
+    private Integer birthYear;
 
     @Column(nullable = false)
-    private int birthMonth;
+    private Integer birthMonth;
 
     @Column(nullable = false)
-    private int birthDay;
+    private Integer birthDay;
 
     @Column(nullable = false)
     private String gender;
@@ -55,9 +55,9 @@ public class User {
     @Column(nullable = false)
     private String role;
 
-    private boolean isTagExist;
+    private Boolean isTagExist;
 
-    private boolean isBlocked;
+    private Boolean isBlocked;
 
     @CreatedDate
     @Column(updatable = false)

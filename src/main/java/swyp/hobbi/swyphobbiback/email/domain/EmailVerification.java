@@ -24,7 +24,8 @@ public class EmailVerification {
 
     private String token;
 
-    private boolean verified; //인증 완료 여부
+    private Boolean verified; //인증 완료 여부
 
     private LocalDateTime expiresAt; //토큰 만료 시간
+
 }
