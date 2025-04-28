@@ -3,7 +3,6 @@ package swyp.hobbi.swyphobbiback.user.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import swyp.hobbi.swyphobbiback.hobbytag.domain.HobbyTag;
 
 import java.util.List;
 
@@ -22,5 +21,5 @@ public class UserCreateRequest {
     private String nickname;
     private String mbti;
     private String userImageUrl;
-    private List<HobbyTag> hobbyTags;
+    private List<String> hobbyTags;
 }
