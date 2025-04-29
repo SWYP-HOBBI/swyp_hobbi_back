@@ -1,4 +1,4 @@
-package swyp.hobbi.swyphobbiback.user.domain;
+package swyp.hobbi.swyphobbiback.userhobbytag.domain;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import swyp.hobbi.swyphobbiback.hobbytag.domain.HobbyTag;
+import swyp.hobbi.swyphobbiback.user.domain.User;
 
 @Entity
 @Getter
@@ -18,7 +19,7 @@ public class UserHobbyTag {
     private Long userHobbyTagId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne

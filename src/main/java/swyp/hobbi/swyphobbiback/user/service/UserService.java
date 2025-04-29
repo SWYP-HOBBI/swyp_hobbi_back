@@ -4,13 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import swyp.hobbi.swyphobbiback.common.exception.UserNotFoundException;
+import swyp.hobbi.swyphobbiback.hobbytag.domain.HobbyTag;
+import swyp.hobbi.swyphobbiback.hobbytag.repository.HobbyTagRepository;
 import swyp.hobbi.swyphobbiback.token.dto.TokenPair;
 import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
 import swyp.hobbi.swyphobbiback.common.exception.CustomException;
 import swyp.hobbi.swyphobbiback.email.domain.EmailVerification;
 import swyp.hobbi.swyphobbiback.email.repository.EmailVerificationRepository;
 import swyp.hobbi.swyphobbiback.user.domain.User;
-import swyp.hobbi.swyphobbiback.user.domain.UserHobbyTag;
+import swyp.hobbi.swyphobbiback.userhobbytag.domain.UserHobbyTag;
 import swyp.hobbi.swyphobbiback.user.dto.LoginRequest;
 import swyp.hobbi.swyphobbiback.user.dto.LoginResponse;
 import swyp.hobbi.swyphobbiback.user.dto.UserCreateRequest;
@@ -25,6 +27,7 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final HobbyTagRepository hobbyTagRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationRepository emailVerificationRepository;
     private final TokenService tokenService;
@@ -55,13 +58,17 @@ public class UserService {
                 .gender(request.getGender())
                 .mbti(request.getMbti())
                 .role("User")
+                .isTagExist(!request.getHobbyTags().isEmpty())
+                .isBlocked(false)
                 .userImageUrl(request.getUserImageUrl() != null ? request.getUserImageUrl() : "default.png") //기본값 설정 필요
                 .build();
 
-        List<UserHobbyTag> userHobbyTags = request.getHobbyTags().stream()
-                .map(hobbyTag -> new UserHobbyTag(user, hobbyTag))
-                .toList();
-        user.getUserHobbyTags().addAll(userHobbyTags);
+        List<HobbyTag> hobbyTags = hobbyTagRepository.findAllByHobbyTagNameIn(request.getHobbyTags());
+
+        // UserHobbyTag 생성
+        for (HobbyTag hobbyTag : hobbyTags) {
+            user.getUserHobbyTags().add(new UserHobbyTag(user, hobbyTag));
+        }
 
         userRepository.save(user); // 유저 정보 저장
 

@@ -6,5 +6,5 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class DuplicateCheckResponse {
-    private boolean isDuplicate;
+    private Boolean isDuplicate;
 }
