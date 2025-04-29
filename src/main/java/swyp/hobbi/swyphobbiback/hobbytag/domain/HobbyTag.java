@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import swyp.hobbi.swyphobbiback.post_hobbytag.domain.PostHobbyTag;
-import swyp.hobbi.swyphobbiback.user.domain.UserHobbyTag;
-
 import swyp.hobbi.swyphobbiback.userhobbytag.domain.UserHobbyTag;
 
 import java.util.ArrayList;
