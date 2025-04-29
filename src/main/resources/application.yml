@@ -40,17 +40,9 @@ jwt:
   secret: your-secret-key
   expiration: 3600000
 
-ncp:
-  storage:
-    region: kr-standard
-    endpoint: https://kr.object.ncloudstorage.com
-    accessKey: ncp_iam_BPAMKR2vSx9ZdOU07LKK
-    secretKey: ncp_iam_BPKMKRKt7vCaDIa1vUK47okLqUqAijI2ks
-
 logging:
   level:
     org:
       springframework:
         security: DEBUG
-    secretKey: ncp_iam_BPKMKRKt7vCaDIa1vUK47okLqUqAijI2ks
 
