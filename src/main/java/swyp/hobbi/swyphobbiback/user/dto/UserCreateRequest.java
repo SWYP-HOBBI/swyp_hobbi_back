@@ -14,9 +14,9 @@ public class UserCreateRequest {
     private String username;
     private String password;
     private String passwordConfirm;
-    private int birthYear;
-    private int birthMonth;
-    private int birthDay;
+    private Integer birthYear;
+    private Integer birthMonth;
+    private Integer birthDay;
     private String gender; //'F', 'M'
     private String nickname;
     private String mbti;

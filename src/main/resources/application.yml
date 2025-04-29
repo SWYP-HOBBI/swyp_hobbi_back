@@ -1,10 +1,10 @@
 spring :
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/hobbi
+    url: jdbc:mysql://db-33uu5c-kr.vpc-pub-cdb.ntruss.com:3306/hobbi
 
-    username: root
-    password: 1234
+    username: hobbi
+    password: hobbi1234!
 
   data:
     redis:
@@ -52,5 +52,5 @@ logging:
     org:
       springframework:
         security: DEBUG
-    secretKey: ncp_iam_BPKMKRKt7vCaDIa1vUK47okLqUqAijI2ks
+    #secretKey: ncp_iam_BPKMKRKt7vCaDIa1vUK47okLqUqAijI2ks
 
