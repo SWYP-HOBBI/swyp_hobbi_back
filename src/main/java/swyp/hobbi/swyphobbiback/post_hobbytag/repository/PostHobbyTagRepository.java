@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface PostHobbyTagRepository extends JpaRepository<PostHobbyTag, Long> {
-    List<PostHobbyTag> findAllByPostId(Long postId);
+    List<PostHobbyTag> findAllByPost_PostId(Long postId);
 }
