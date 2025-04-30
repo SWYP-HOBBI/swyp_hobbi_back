@@ -43,14 +43,14 @@ public class PostImageService {
         return objectStorageClient.getUrl(BUCKET_NAME, fileName).toString();
     }
 
-    public void savePostImage(MultipartFile file, Post post, String imageUrl) {
+    public PostImage savePostImage(MultipartFile file, Post post, String imageUrl) {
         PostImage image = PostImage.builder()
                 .post(post)
                 .imageUrl(imageUrl)
                 .imageFileName(file.getOriginalFilename())
                 .build();
 
-        postImageRepository.save(image);
+        return postImageRepository.save(image);
     }
 
     public void deletePostImage(String imageUrl) {
