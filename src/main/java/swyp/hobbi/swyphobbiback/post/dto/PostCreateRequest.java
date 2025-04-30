@@ -8,8 +8,8 @@ import java.util.List;
 @Getter
 @ToString
 public class PostCreateRequest {
-    private String postTitle;
-    private String postContent;
+    private String title;
+    private String content;
     private Long userId;
     private List<String> hobbyTagNames;
 }

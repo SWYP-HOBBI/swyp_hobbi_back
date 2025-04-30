@@ -3,6 +3,8 @@ package swyp.hobbi.swyphobbiback.post.dto;
 import lombok.Getter;
 import lombok.ToString;
 import swyp.hobbi.swyphobbiback.post.domain.Post;
+import swyp.hobbi.swyphobbiback.post_hobbytag.domain.PostHobbyTag;
+import swyp.hobbi.swyphobbiback.post_image.domain.PostImage;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,12 +28,14 @@ public class PostResponse {
         response.title = post.getPostTitle();
         response.content = post.getPostContent();
         response.postImageUrls = post.getPostImages().stream()
-                .map()
+                .map(PostImage::getImageUrl)
                 .toList();
         response.postHobbyTags = post.getPostHobbyTags().stream()
-                .map()
+                .map(postHobbyTag -> postHobbyTag.getHobbyTag().getHobbyTagName())
                 .toList();
         response.createdAt = post.getCreatedAt();
         response.updatedAt = post.getUpdatedAt();
+
+        return response;
     }
 }
