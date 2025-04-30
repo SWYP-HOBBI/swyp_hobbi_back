@@ -10,7 +10,6 @@ import swyp.hobbi.swyphobbiback.post.domain.Post;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
-@ToString
 public class PostImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
