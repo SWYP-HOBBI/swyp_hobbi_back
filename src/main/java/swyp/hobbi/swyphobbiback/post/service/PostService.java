@@ -3,9 +3,11 @@ package swyp.hobbi.swyphobbiback.post.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
 import swyp.hobbi.swyphobbiback.common.exception.FileUploadFailedException;
 import swyp.hobbi.swyphobbiback.common.exception.PostNotFoundException;
 import swyp.hobbi.swyphobbiback.common.security.CustomUserDetails;
@@ -14,10 +16,12 @@ import swyp.hobbi.swyphobbiback.hobbytag.repository.HobbyTagRepository;
 import swyp.hobbi.swyphobbiback.post.domain.Post;
 import swyp.hobbi.swyphobbiback.post.dto.PostCreateRequest;
 import swyp.hobbi.swyphobbiback.post.dto.PostResponse;
+import swyp.hobbi.swyphobbiback.post.dto.PostUpdateRequest;
 import swyp.hobbi.swyphobbiback.post.repository.PostRepository;
 import swyp.hobbi.swyphobbiback.post_hobbytag.domain.PostHobbyTag;
 import swyp.hobbi.swyphobbiback.post_image.domain.PostImage;
 import swyp.hobbi.swyphobbiback.post_image.event.PostImageUploadEvent;
+import swyp.hobbi.swyphobbiback.post_image.repository.PostImageRepository;
 import swyp.hobbi.swyphobbiback.post_image.service.PostImageService;
 
 import java.util.ArrayList;
@@ -30,6 +34,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostImageService postImageService;
     private final HobbyTagRepository hobbyTagRepository;
+    private final PostImageRepository postImageRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
@@ -46,10 +51,10 @@ public class PostService {
         List<PostImage> postImages = post.getPostImages();
 
         try {
-            if(!imageFiles.isEmpty()) {
+            if(imageFiles != null && !imageFiles.isEmpty()) {
                 for(MultipartFile imageFile : imageFiles) {
                     String generatedUniqueFileName = postImageService.fileNameFormatter(imageFile);
-                    String imageUrl = postImageService.getObjectStorageUrl(generatedUniqueFileName);
+                    String imageUrl = postImageService.generateObjectStorageUrl(generatedUniqueFileName);
                     PostImage savedPostImage = postImageService.savePostImage(imageFile, post, imageUrl);
                     postImages.add(savedPostImage);
 
@@ -90,6 +95,75 @@ public class PostService {
     public PostResponse findPost(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(PostNotFoundException::new);
+
+        return PostResponse.from(post);
+    }
+
+    @Transactional
+    public PostResponse update(CustomUserDetails userDetails, Long postId, PostUpdateRequest request, List<MultipartFile> newImageFiles) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(PostNotFoundException::new);
+
+        if (!post.getUser().getUserId().equals(userDetails.getUserId())) {
+            throw new AccessDeniedException(ErrorCode.FORBIDDEN.getMessage());
+        }
+
+        post.update(request.getTitle(), request.getContent());
+
+        List<PostImage> postImages = post.getPostImages();
+        List<String> uploadedImageUrls = new ArrayList<>();
+
+        if(request.getDeletedImageUrls() != null && !request.getDeletedImageUrls().isEmpty()) {
+            List<PostImage> toDeleteImages = post.getPostImages().stream()
+                    .filter(image -> request.getDeletedImageUrls().contains(image.getImageUrl()))
+                    .toList();
+
+            for (PostImage image : toDeleteImages) {
+                String suffixImageUrl = postImageService.getSuffixImageUrl(image.getImageUrl());
+                postImageService.deletePostImage(suffixImageUrl);
+                postImages.remove(image);
+                postImageRepository.delete(image);
+            }
+        }
+
+        try {
+            if(newImageFiles != null && !newImageFiles.isEmpty()) {
+                for(MultipartFile imageFile : newImageFiles) {
+                    String generatedUniqueFileName = postImageService.fileNameFormatter(imageFile);
+                    String imageUrl = postImageService.generateObjectStorageUrl(generatedUniqueFileName);
+                    PostImage savedPostImage = postImageService.savePostImage(imageFile, post, imageUrl);
+                    postImages.add(savedPostImage);
+
+                    eventPublisher.publishEvent(PostImageUploadEvent.builder()
+                            .postImageId(savedPostImage.getImageId())
+                            .file(imageFile)
+                            .fileName(generatedUniqueFileName)
+                            .build()
+                    );
+                    uploadedImageUrls.add(imageUrl);
+                }
+            }
+        } catch (Exception e) {
+            for(String uploadedImageUrl : uploadedImageUrls) {
+                postImageService.deletePostImage(uploadedImageUrl);
+            }
+
+            throw new FileUploadFailedException();
+        }
+
+        post.getPostHobbyTags().clear();
+
+        if(!request.getHobbyTagNames().isEmpty()) {
+            List<HobbyTag> hobbyTags = hobbyTagRepository.findAllByHobbyTagNameIn(request.getHobbyTagNames());
+            List<PostHobbyTag> postHobbyTags = hobbyTags.stream()
+                    .map(hobbyTag -> PostHobbyTag.builder()
+                            .post(post)
+                            .hobbyTag(hobbyTag)
+                            .build()
+                    )
+                    .toList();
+            post.getPostHobbyTags().addAll(postHobbyTags);
+        }
 
         return PostResponse.from(post);
     }
