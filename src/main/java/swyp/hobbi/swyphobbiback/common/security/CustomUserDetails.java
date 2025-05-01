@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import lombok.Getter;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import swyp.hobbi.swyphobbiback.user.domain.User;
 import org.springframework.security.core.GrantedAuthority;
@@ -30,7 +31,7 @@ public class CustomUserDetails implements UserDetails {
     // 사용자 권한 목록, 권한 반환
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null; // 필요하면 role 여기서 꺼내서 반환
+        return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole())); // 필요하면 role 여기서 꺼내서 반환
     }
 
     // 사용자 password

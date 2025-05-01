@@ -5,17 +5,23 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.filter.OncePerRequestFilter;
 import swyp.hobbi.swyphobbiback.common.exception.CustomException;
 
 import java.io.IOException;
 
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter { //Access Token 인증 필터
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Override
     protected void doFilterInternal( //Access Token 검사
@@ -29,10 +35,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter { //Access Tok
         if (accessToken != null) {//액세스 토큰 존재시
             try {
                 jwtTokenProvider.validateToken(accessToken); //토큰 유효성 검사
-
                 String email = jwtTokenProvider.getEmailFromToken(accessToken);
+                UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+                log.info("Authority : {}", userDetails.getAuthorities().toString());
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(email, null, null);
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
                 SecurityContextHolder.getContext().setAuthentication(authentication); //사용자 인증 정보 등록
 
