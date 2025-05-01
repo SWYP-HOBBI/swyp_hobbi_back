@@ -49,12 +49,17 @@ public class PostImageService {
         );
     }
 
-    public String getObjectStorageUrl(String fileName) {
+    public String generateObjectStorageUrl(String fileName) {
         return FILE_FORMAT.formatted(
                 PREFIX_IMAGE_URL,
                 BUCKET_NAME,
                 DIRECTORY_SEPARATOR,
                 fileName
         );
+    }
+
+    public String getSuffixImageUrl(String imageUrl) {
+        String prefixAndBucketName = PREFIX_IMAGE_URL + BUCKET_NAME + DIRECTORY_SEPARATOR;
+        return imageUrl.replace(prefixAndBucketName, "");
     }
 }
