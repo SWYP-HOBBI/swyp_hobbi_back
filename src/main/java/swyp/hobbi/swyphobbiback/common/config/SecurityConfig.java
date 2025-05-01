@@ -9,6 +9,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import swyp.hobbi.swyphobbiback.common.security.CustomUserDetailsService;
 import swyp.hobbi.swyphobbiback.common.security.JwtAuthenticationFilter;
 import swyp.hobbi.swyphobbiback.common.security.JwtTokenProvider;
 
@@ -18,6 +19,7 @@ import swyp.hobbi.swyphobbiback.common.security.JwtTokenProvider;
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final CustomUserDetailsService customUserDetailsService;
 
     //비밀번호 암호화
     @Bean
@@ -40,11 +42,13 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/api/v1/user/**",
                                 "/api/v1/email/**",
-                                "/api/v1/token/**"
+                                "/api/v1/token/**",
+                                "/api/v1/post/**"
                         ).permitAll()
                         .anyRequest().authenticated() // 나머지는 인증 필요
 
-                ).addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+                ).addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, customUserDetailsService),
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
 
