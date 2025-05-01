@@ -45,6 +45,15 @@ public class PostController {
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles
     ) {
         PostResponse response = postService.update(userDetails, postId, request, imageFiles);
-        return new  ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<PostResponse> deletePost(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long postId
+    ) {
+        postService.delete(userDetails, postId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

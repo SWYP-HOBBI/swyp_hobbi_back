@@ -167,4 +167,23 @@ public class PostService {
 
         return PostResponse.from(post);
     }
+
+    public void delete(CustomUserDetails userDetails, Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(PostNotFoundException::new);
+
+        if (!post.getUser().getUserId().equals(userDetails.getUserId())) {
+            throw new AccessDeniedException(ErrorCode.FORBIDDEN.getMessage());
+        }
+
+        for(PostImage image : post.getPostImages()) {
+            String suffixImageUrl = postImageService.getSuffixImageUrl(image.getImageUrl());
+            postImageService.deletePostImage(suffixImageUrl);
+        }
+
+        post.getPostImages().clear();
+        post.getPostHobbyTags().clear();
+
+        postRepository.delete(post);
+    }
 }
