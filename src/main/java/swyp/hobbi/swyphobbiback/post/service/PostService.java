@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import swyp.hobbi.swyphobbiback.common.exception.FileUploadFailedException;
+import swyp.hobbi.swyphobbiback.common.exception.PostNotFoundException;
 import swyp.hobbi.swyphobbiback.common.security.CustomUserDetails;
 import swyp.hobbi.swyphobbiback.hobbytag.domain.HobbyTag;
 import swyp.hobbi.swyphobbiback.hobbytag.repository.HobbyTagRepository;
@@ -82,6 +83,13 @@ public class PostService {
         }
 
         post.getPostHobbyTags().addAll(postHobbyTags);
+
+        return PostResponse.from(post);
+    }
+
+    public PostResponse findPost(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(PostNotFoundException::new);
 
         return PostResponse.from(post);
     }

@@ -30,4 +30,9 @@ public class PostController {
         PostResponse response = postService.create(userDetails, request, imageFiles);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<PostResponse> getPostDetail(@PathVariable Long postId) {
+        return new ResponseEntity<>(postService.findPost(postId), HttpStatus.OK);
+    }
 }
