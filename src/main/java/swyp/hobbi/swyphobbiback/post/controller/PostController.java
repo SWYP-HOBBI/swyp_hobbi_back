@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import swyp.hobbi.swyphobbiback.common.security.CustomUserDetails;
 import swyp.hobbi.swyphobbiback.post.dto.PostCreateRequest;
 import swyp.hobbi.swyphobbiback.post.dto.PostResponse;
+import swyp.hobbi.swyphobbiback.post.dto.PostUpdateRequest;
 import swyp.hobbi.swyphobbiback.post.service.PostService;
 
 import java.util.List;
@@ -34,5 +35,16 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponse> getPostDetail(@PathVariable Long postId) {
         return new ResponseEntity<>(postService.findPost(postId), HttpStatus.OK);
+    }
+
+    @PutMapping("/{postId}")
+    public ResponseEntity<PostResponse> updatePost(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long postId,
+            @RequestPart("request") PostUpdateRequest request,
+            @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles
+    ) {
+        PostResponse response = postService.update(userDetails, postId, request, imageFiles);
+        return new  ResponseEntity<>(response, HttpStatus.OK);
     }
 }
