@@ -49,11 +49,9 @@ public class Post {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    public void update(String postTitle, String postContent, List<PostHobbyTag> hobbyTags, List<PostImage> images) {
+    public void update(String postTitle, String postContent) {
         this.postTitle = postTitle;
         this.postContent = postContent;
-        this.postHobbyTags = hobbyTags;
-        this.postImages = images;
         updatedAt = LocalDateTime.now();
     }
 }
