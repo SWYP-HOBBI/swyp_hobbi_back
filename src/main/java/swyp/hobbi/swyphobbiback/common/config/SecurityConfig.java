@@ -12,6 +12,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import swyp.hobbi.swyphobbiback.common.security.CustomUserDetailsService;
 import swyp.hobbi.swyphobbiback.common.security.JwtAuthenticationFilter;
 import swyp.hobbi.swyphobbiback.common.security.JwtTokenProvider;
+import swyp.hobbi.swyphobbiback.user.handler.OAuth2FailureHandler;
+import swyp.hobbi.swyphobbiback.user.handler.OAuth2SuccessHandler;
+import swyp.hobbi.swyphobbiback.user.service.CustomOAuth2UserService;
 
 @Configuration
 @EnableWebSecurity
@@ -20,6 +23,9 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomUserDetailsService customUserDetailsService;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final OAuth2FailureHandler oAuth2FailureHandler;
 
     //비밀번호 암호화
     @Bean
@@ -43,14 +49,28 @@ public class SecurityConfig {
                                 "/api/v1/user/**",
                                 "/api/v1/email/**",
                                 "/api/v1/token/**",
-                                "/api/v1/post/*", // 단일 조회 허용
-                                "/error/**"
+                                "/api/v1/post/*", // 단건 조회 허용
+                                "/error/**",
+                                "/api/v1/user/login/oauth2/**",
+                                "/api/v1/user/login/oauth2/code/**",
+                                "/login/oauth2/**"
                         ).permitAll()
                         .requestMatchers("/api/v1/post/**").authenticated()
                         .anyRequest().authenticated() // 나머지는 인증 필요
 
                 ).addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, customUserDetailsService),
-                        UsernamePasswordAuthenticationFilter.class);
+                        UsernamePasswordAuthenticationFilter.class)
+                .oauth2Login(oauth -> oauth
+                        .authorizationEndpoint(endpoint -> endpoint
+                                .baseUri("/api/v1/user/login/oauth2") // 인가 요청 경로 설정
+                        )
+                        .redirectionEndpoint(endpoint -> endpoint
+                                .baseUri("/api/v1/user/login/oauth2/code/*") // 인가 코드 수신 경로 설정
+                        )
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .successHandler(oAuth2SuccessHandler)
+                        .failureHandler(oAuth2FailureHandler)
+                );
 
         return http.build();
 
