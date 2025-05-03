@@ -3,9 +3,13 @@ package swyp.hobbi.swyphobbiback.post.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
 import swyp.hobbi.swyphobbiback.common.exception.FileUploadFailedException;
@@ -23,6 +27,8 @@ import swyp.hobbi.swyphobbiback.post_image.domain.PostImage;
 import swyp.hobbi.swyphobbiback.post_image.event.PostImageUploadEvent;
 import swyp.hobbi.swyphobbiback.post_image.repository.PostImageRepository;
 import swyp.hobbi.swyphobbiback.post_image.service.PostImageService;
+import swyp.hobbi.swyphobbiback.userhobbytag.domain.UserHobbyTag;
+import swyp.hobbi.swyphobbiback.userhobbytag.repository.UserHobbyTagRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,10 +41,12 @@ public class PostService {
     private final PostImageService postImageService;
     private final HobbyTagRepository hobbyTagRepository;
     private final PostImageRepository postImageRepository;
+    private final UserHobbyTagRepository userHobbyTagRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public PostResponse create(CustomUserDetails userDetails, PostCreateRequest request, List<MultipartFile> imageFiles) {
+        log.info("userDetails={}", userDetails);
         Post post = Post.builder()
                 .user(userDetails.getUser())
                 .postTitle(request.getTitle())
@@ -185,5 +193,38 @@ public class PostService {
         post.getPostHobbyTags().clear();
 
         postRepository.delete(post);
+    }
+
+    public List<PostResponse> findPostsInfiniteScroll(final CustomUserDetails userDetails, boolean tagExist, Long lastPostId, final Integer pageSize) {
+        final Long userId = userDetails.getUserId();
+        List<Long> postIds = fetchPostIds(tagExist, lastPostId, pageSize, userId);
+        List<Post> posts = postRepository.findPostWithHobbyAndUser(postIds);
+
+        return posts.stream()
+                .map(PostResponse::from)
+                .toList();
+    }
+
+    private List<Long> getUserHobbyTagIds(final Long userId) {
+        return userHobbyTagRepository.findAllByUser_UserId(userId)
+                .stream()
+                .map(UserHobbyTag::getHobbyTag)
+                .map(HobbyTag::getHobbyTagId)
+                .toList();
+    }
+
+    private List<Long> fetchPostIds(final boolean tagExist, final Long lastPostId, final Integer pageSize, final Long userId) {
+        boolean isFirstPage = lastPostId == null || lastPostId == 0;
+        if (!tagExist) {
+            if (isFirstPage) {
+                return postRepository.findPostsByIds(pageSize);
+            }
+            return postRepository.findPostsByIds(lastPostId, pageSize);
+        }
+        final List<Long> hobbyTagIds = getUserHobbyTagIds(userId);
+        if (isFirstPage) {
+            return postRepository.findPostIdsWithTags(hobbyTagIds, pageSize);
+        }
+        return postRepository.findPostIdsWithTags(hobbyTagIds, lastPostId, pageSize);
     }
 }

@@ -49,11 +49,13 @@ public class SecurityConfig {
                                 "/api/v1/user/**",
                                 "/api/v1/email/**",
                                 "/api/v1/token/**",
-                                "/api/v1/post/**",
+                                "/api/v1/post/*", // 단건 조회 허용
+                                "/error/**",
                                 "/api/v1/user/login/oauth2/**",
                                 "/api/v1/user/login/oauth2/code/**",
                                 "/login/oauth2/**"
                         ).permitAll()
+                        .requestMatchers("/api/v1/post/**").authenticated()
                         .anyRequest().authenticated() // 나머지는 인증 필요
 
                 ).addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, customUserDetailsService),

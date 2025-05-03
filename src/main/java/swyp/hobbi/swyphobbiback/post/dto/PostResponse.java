@@ -14,6 +14,7 @@ public class PostResponse {
     private Long postId;
     private String nickname;
     private String userImageUrl;
+    private Long userId;
     private String title;
     private String content;
     private List<String> postImageUrls;
@@ -26,6 +27,7 @@ public class PostResponse {
         response.postId = post.getPostId();
         response.nickname = post.getUser().getNickname();
         response.userImageUrl = post.getUser().getUserImageUrl();
+        response.userId = post.getUser().getUserId();
         response.title = post.getPostTitle();
         response.content = post.getPostContent();
         response.postImageUrls = post.getPostImages().stream()

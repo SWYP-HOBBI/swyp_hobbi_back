@@ -56,4 +56,15 @@ public class PostController {
         postService.delete(userDetails, postId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @GetMapping
+    public ResponseEntity<List<PostResponse>> getPostsInfiniteScroll(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(value = "tagExist") boolean tagExist,
+            @RequestParam(value = "lastPostId", required = false) Long lastPostId,
+            @RequestParam(value = "pageSize", defaultValue = "15") Integer pageSize
+    ) {
+        final List<PostResponse> postsInfiniteScroll = postService.findPostsInfiniteScroll(userDetails, tagExist, lastPostId, pageSize);
+        return ResponseEntity.ok(postsInfiniteScroll);
+    }
 }

@@ -30,32 +30,32 @@ public class EmailVerificationController {
         emailVerificationService.sendVerificationLink(email);
         return ResponseEntity.ok("인증 메일 발송 완료!");
     }
-/**
-    @GetMapping("/verify") //토큰으로 인증 처리
-    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
+
+//    @GetMapping("/verify") //토큰으로 인증 처리
+//    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
+//        EmailVerification verification = emailVerificationRepository.findByToken(token)
+//                .orElseThrow(() -> new IllegalArgumentException("잘못된 인증 토큰입니다."));
+//
+//        if (verification.getExpiresAt().isBefore(LocalDateTime.now())) {
+//            return ResponseEntity.badRequest().body("인증 링크가 만료되었습니다.");
+//        }
+//
+//        verification.setVerified(true);
+//        emailVerificationRepository.save(verification);
+//
+//        return ResponseEntity.ok("이메일 인증이 완료되었습니다!");
+//
+//    }
+
+    @GetMapping("/verify")
+    public ResponseEntity<?> verifyEmail(@RequestParam String token,
+                                         @RequestParam(required = false) String redirectUrl,
+                                         HttpServletResponse response) throws IOException {
         EmailVerification verification = emailVerificationRepository.findByToken(token)
                 .orElseThrow(() -> new IllegalArgumentException("잘못된 인증 토큰입니다."));
 
         if (verification.getExpiresAt().isBefore(LocalDateTime.now())) {
-            return ResponseEntity.badRequest().body("인증 링크가 만료되었습니다.");
-        }
-
-        verification.setVerified(true);
-        emailVerificationRepository.save(verification);
-
-        return ResponseEntity.ok("이메일 인증이 완료되었습니다!");
-
-    }**/
-
-    @GetMapping("/verify")
-    public ResponseEntity<?> verifyEmail(@RequestParam String token,
-                        @RequestParam(required = false) String redirectUrl,
-                        HttpServletResponse response) throws IOException {
-        EmailVerification verification = emailVerificationRepository.findByToken(token)
-            .orElseThrow(() -> new IllegalArgumentException("잘못된 인증 토큰입니다."));
-
-        if (verification.getExpiresAt().isBefore(LocalDateTime.now())) {
-            response.sendRedirect("http://localhost:3000/verify-fail");
+            response.sendRedirect("http://localhost:3000/verify_fail");
             return ResponseEntity.ok(response);
         }
 
@@ -64,7 +64,7 @@ public class EmailVerificationController {
 
         String email = verification.getEmail();
 
-        String targetUrl = (redirectUrl != null) ? redirectUrl : "http://localhost:3000/verify-email?token=" + token + "&email=" + email;
+        String targetUrl = (redirectUrl != null) ? redirectUrl : "http://localhost:3000/verify_email?token=" + token + "&email=" + email;
         response.sendRedirect(targetUrl);
 
         log.info("redirectUrl: {}", targetUrl);
