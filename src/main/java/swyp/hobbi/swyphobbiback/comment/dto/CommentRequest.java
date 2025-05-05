@@ -5,9 +5,9 @@ import lombok.ToString;
 
 @Getter
 @ToString
-public class CommentCreateRequest {
+public class CommentRequest {
     private Long postId;
-    private String comment;
+    private String content;
     private Long parentCommentId;
     private Long userId;
 }
