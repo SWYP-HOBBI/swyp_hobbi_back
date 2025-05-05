@@ -1,5 +1,6 @@
 package swyp.hobbi.swyphobbiback.token.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +19,7 @@ public class ReissueController {
     private final ReissueService reissueService;
 
     @PostMapping("/reissue")
-    public ResponseEntity<ReissueResponse> reissue(@RequestBody ReissueRequest request) {
+    public ResponseEntity<ReissueResponse> reissue(HttpServletRequest request) {
         ReissueResponse response = reissueService.reissue(request);
         return ResponseEntity.ok(response);
     }
