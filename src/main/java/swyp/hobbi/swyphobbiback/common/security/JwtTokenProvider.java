@@ -1,6 +1,7 @@
 package swyp.hobbi.swyphobbiback.common.security;
 
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -59,7 +60,7 @@ public class JwtTokenProvider {
         }
     }
 
-    public void validateToken(String token) { //토큰 유효성 검사
+    public boolean validateToken(String token) { //토큰 유효성 검사
         try {
             Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(token);
         } catch (ExpiredJwtException e) {
@@ -67,12 +68,34 @@ public class JwtTokenProvider {
         } catch (JwtException | IllegalArgumentException e) {
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
+        return false;
     }
 
     public String resolveAccessToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
+        }
+        return null;
+    }
+
+    public String getAccessTokenFromCookies(HttpServletRequest request) {
+        if (request.getCookies() == null) return null;
+
+        for (Cookie cookie : request.getCookies()) {
+            if ("accessToken".equals(cookie.getName())) {
+                return cookie.getValue(); //쿠키에서 액세스 토큰 꺼내기
+            }
+        }
+        return null;
+    }
+
+    public String getRefreshTokenFromCookies(HttpServletRequest request) {
+        if (request.getCookies() == null) return null;
+        for (Cookie cookie : request.getCookies()) {
+            if ("refreshToken".equals(cookie.getName())) {
+                return cookie.getValue(); //쿠키에서 리프레쉬 토큰 꺼내기
+            }
         }
         return null;
     }
