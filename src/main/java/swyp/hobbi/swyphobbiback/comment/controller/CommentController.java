@@ -1,0 +1,36 @@
+package swyp.hobbi.swyphobbiback.comment.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import swyp.hobbi.swyphobbiback.comment.dto.CommentRequest;
+import swyp.hobbi.swyphobbiback.comment.dto.CommentResponse;
+import swyp.hobbi.swyphobbiback.comment.service.CommentService;
+import swyp.hobbi.swyphobbiback.common.security.CustomUserDetails;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/v1")
+public class CommentController {
+    private final CommentService commentService;
+
+    @PostMapping("/comment")
+    public ResponseEntity<CommentResponse> createComment(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody CommentRequest request
+    ) {
+        CommentResponse response = commentService.create(userDetails, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/comment/{commentId}")
+    public ResponseEntity<CommentResponse> updateComment(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long commentId,
+            @RequestBody CommentRequest request
+    ) {
+        CommentResponse response = commentService.update(userDetails, commentId, request);
+        return ResponseEntity.ok(response);
+    }
+}
