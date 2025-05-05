@@ -48,4 +48,9 @@ public class Comment {
     public void setDeletedTrue() {
         deleted = true;
     }
+
+    public void update(String commentContent) {
+        this.commentContent = commentContent;
+        this.updatedAt = LocalDateTime.now();
+    }
 }
