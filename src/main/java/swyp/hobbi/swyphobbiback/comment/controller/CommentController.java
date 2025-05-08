@@ -1,12 +1,12 @@
 package swyp.hobbi.swyphobbiback.comment.controller;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import swyp.hobbi.swyphobbiback.comment.dto.CommentRequest;
+import swyp.hobbi.swyphobbiback.comment.dto.CommentCreateRequest;
 import swyp.hobbi.swyphobbiback.comment.dto.CommentResponse;
+import swyp.hobbi.swyphobbiback.comment.dto.CommentUpdateRequest;
 import swyp.hobbi.swyphobbiback.comment.service.CommentService;
 import swyp.hobbi.swyphobbiback.common.security.CustomUserDetails;
 
@@ -21,7 +21,7 @@ public class CommentController {
     @PostMapping("/comment")
     public ResponseEntity<CommentResponse> createComment(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody CommentRequest request
+            @RequestBody CommentCreateRequest request
     ) {
         CommentResponse response = commentService.create(userDetails, request);
         return ResponseEntity.ok(response);
@@ -31,7 +31,7 @@ public class CommentController {
     public ResponseEntity<CommentResponse> updateComment(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long commentId,
-            @RequestBody CommentRequest request
+            @RequestBody CommentUpdateRequest request
     ) {
         CommentResponse response = commentService.update(userDetails, commentId, request);
         return ResponseEntity.ok(response);
