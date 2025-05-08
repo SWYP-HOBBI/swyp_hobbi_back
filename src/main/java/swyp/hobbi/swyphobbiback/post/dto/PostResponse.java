@@ -19,10 +19,11 @@ public class PostResponse {
     private String content;
     private List<String> postImageUrls;
     private List<String> postHobbyTags;
+    private Long commentCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static PostResponse from(Post post) {
+    public static PostResponse from(Post post, Long count) {
         PostResponse response = new PostResponse();
         response.postId = post.getPostId();
         response.nickname = post.getUser().getNickname();
@@ -36,6 +37,7 @@ public class PostResponse {
         response.postHobbyTags = post.getPostHobbyTags().stream()
                 .map(postHobbyTag -> postHobbyTag.getHobbyTag().getHobbyTagName())
                 .toList();
+        response.commentCount = count == null ? 0L : count;
         response.createdAt = post.getCreatedAt();
         response.updatedAt = post.getUpdatedAt();
 
