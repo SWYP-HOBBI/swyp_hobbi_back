@@ -3,14 +3,13 @@ package swyp.hobbi.swyphobbiback.post.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import swyp.hobbi.swyphobbiback.comment.dto.CommentCountProjection;
+import swyp.hobbi.swyphobbiback.comment.repository.CommentRepository;
+import swyp.hobbi.swyphobbiback.comment.service.CommentService;
 import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
 import swyp.hobbi.swyphobbiback.common.exception.FileUploadFailedException;
 import swyp.hobbi.swyphobbiback.common.exception.PostNotFoundException;
@@ -32,6 +31,8 @@ import swyp.hobbi.swyphobbiback.userhobbytag.repository.UserHobbyTagRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,11 +43,11 @@ public class PostService {
     private final HobbyTagRepository hobbyTagRepository;
     private final PostImageRepository postImageRepository;
     private final UserHobbyTagRepository userHobbyTagRepository;
+    private final CommentRepository commentRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public PostResponse create(CustomUserDetails userDetails, PostCreateRequest request, List<MultipartFile> imageFiles) {
-        log.info("userDetails={}", userDetails);
+    public void create(CustomUserDetails userDetails, PostCreateRequest request, List<MultipartFile> imageFiles) {
         Post post = Post.builder()
                 .user(userDetails.getUser())
                 .postTitle(request.getTitle())
@@ -96,19 +97,18 @@ public class PostService {
         }
 
         post.getPostHobbyTags().addAll(postHobbyTags);
-
-        return PostResponse.from(post);
     }
 
     public PostResponse findPost(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(PostNotFoundException::new);
+        Long count = commentRepository.countByPostId(postId);
 
-        return PostResponse.from(post);
+        return PostResponse.from(post, count);
     }
 
     @Transactional
-    public PostResponse update(CustomUserDetails userDetails, Long postId, PostUpdateRequest request, List<MultipartFile> newImageFiles) {
+    public void update(CustomUserDetails userDetails, Long postId, PostUpdateRequest request, List<MultipartFile> newImageFiles) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(PostNotFoundException::new);
 
@@ -172,8 +172,6 @@ public class PostService {
                     .toList();
             post.getPostHobbyTags().addAll(postHobbyTags);
         }
-
-        return PostResponse.from(post);
     }
 
     public void delete(CustomUserDetails userDetails, Long postId) {
@@ -199,9 +197,15 @@ public class PostService {
         final Long userId = userDetails.getUserId();
         List<Long> postIds = fetchPostIds(tagExist, lastPostId, pageSize, userId);
         List<Post> posts = postRepository.findPostWithHobbyAndUser(postIds);
+        log.info(postIds.toString());
+        Map<Long, Long> commentCountMap = commentRepository.countsByPostIds(postIds).stream()
+                .collect(Collectors.toMap(CommentCountProjection::getPostId, CommentCountProjection::getCommentCount));
 
         return posts.stream()
-                .map(PostResponse::from)
+                .map(post -> {
+                    Long count = commentCountMap.getOrDefault(post.getPostId(), 0L);
+                    return PostResponse.from(post, count);
+                })
                 .toList();
     }
 
