@@ -6,8 +6,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.hobbi.swyphobbiback.comment.domain.Comment;
-import swyp.hobbi.swyphobbiback.comment.dto.CommentRequest;
+import swyp.hobbi.swyphobbiback.comment.dto.CommentCreateRequest;
 import swyp.hobbi.swyphobbiback.comment.dto.CommentResponse;
+import swyp.hobbi.swyphobbiback.comment.dto.CommentUpdateRequest;
 import swyp.hobbi.swyphobbiback.comment.repository.CommentRepository;
 import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
 import swyp.hobbi.swyphobbiback.common.exception.CommentNotFoundException;
@@ -32,7 +33,7 @@ public class CommentService {
     private final PostRepository postRepository;
 
     @Transactional
-    public CommentResponse create(CustomUserDetails userDetails, CommentRequest request) {
+    public CommentResponse create(CustomUserDetails userDetails, CommentCreateRequest request) {
         if(userDetails == null || userDetails.getUsername() == null) {
             throw new AccessDeniedException(ErrorCode.FORBIDDEN.getMessage());
         }
@@ -54,7 +55,7 @@ public class CommentService {
         return CommentResponse.from(commentRepository.save(comment));
     }
 
-    private Comment findParentComment(CommentRequest request) {
+    private Comment findParentComment(CommentCreateRequest request) {
         Long parentCommentId = request.getParentCommentId();
 
         if(parentCommentId == null) {
@@ -68,7 +69,7 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentResponse update(CustomUserDetails userDetails, Long commentId, CommentRequest request) {
+    public CommentResponse update(CustomUserDetails userDetails, Long commentId, CommentUpdateRequest request) {
         if(!userDetails.getUserId().equals(request.getUserId())) {
             throw new AccessDeniedException(ErrorCode.FORBIDDEN.getMessage());
         }
