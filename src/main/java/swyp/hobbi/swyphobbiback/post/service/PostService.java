@@ -16,6 +16,10 @@ import swyp.hobbi.swyphobbiback.common.exception.PostNotFoundException;
 import swyp.hobbi.swyphobbiback.common.security.CustomUserDetails;
 import swyp.hobbi.swyphobbiback.hobbytag.domain.HobbyTag;
 import swyp.hobbi.swyphobbiback.hobbytag.repository.HobbyTagRepository;
+import swyp.hobbi.swyphobbiback.like.dto.LikeCountProjection;
+import swyp.hobbi.swyphobbiback.like.repository.LikeCountRepository;
+import swyp.hobbi.swyphobbiback.like.repository.LikeRepository;
+import swyp.hobbi.swyphobbiback.like.service.LikeService;
 import swyp.hobbi.swyphobbiback.post.domain.Post;
 import swyp.hobbi.swyphobbiback.post.dto.PostCreateRequest;
 import swyp.hobbi.swyphobbiback.post.dto.PostResponse;
@@ -40,14 +44,16 @@ import java.util.stream.Collectors;
 public class PostService {
     private final PostRepository postRepository;
     private final PostImageService postImageService;
+    private final LikeService likeService;
     private final HobbyTagRepository hobbyTagRepository;
     private final PostImageRepository postImageRepository;
     private final UserHobbyTagRepository userHobbyTagRepository;
     private final CommentRepository commentRepository;
+    private final LikeCountRepository likeCountRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public void create(CustomUserDetails userDetails, PostCreateRequest request, List<MultipartFile> imageFiles) {
+    public PostResponse create(CustomUserDetails userDetails, PostCreateRequest request, List<MultipartFile> imageFiles) {
         Post post = Post.builder()
                 .user(userDetails.getUser())
                 .postTitle(request.getTitle())
@@ -97,14 +103,17 @@ public class PostService {
         }
 
         post.getPostHobbyTags().addAll(postHobbyTags);
+
+        return PostResponse.from(post, null, null);
     }
 
     public PostResponse findPost(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(PostNotFoundException::new);
-        Long count = commentRepository.countByPostId(postId);
+        Long commentCount = commentRepository.countByPostId(postId);
+        Long likeCount = likeService.getCount(postId);
 
-        return PostResponse.from(post, count);
+        return PostResponse.from(post, commentCount, likeCount);
     }
 
     @Transactional
@@ -197,14 +206,16 @@ public class PostService {
         final Long userId = userDetails.getUserId();
         List<Long> postIds = fetchPostIds(tagExist, lastPostId, pageSize, userId);
         List<Post> posts = postRepository.findPostWithHobbyAndUser(postIds);
-        log.info(postIds.toString());
         Map<Long, Long> commentCountMap = commentRepository.countsByPostIds(postIds).stream()
                 .collect(Collectors.toMap(CommentCountProjection::getPostId, CommentCountProjection::getCommentCount));
+        Map<Long, Long> likeCountMap = likeCountRepository.findLikeCountByPostIds(postIds).stream()
+                .collect(Collectors.toMap(LikeCountProjection::getPostId, LikeCountProjection::getLikeCount));
 
         return posts.stream()
                 .map(post -> {
-                    Long count = commentCountMap.getOrDefault(post.getPostId(), 0L);
-                    return PostResponse.from(post, count);
+                    Long commentCount = commentCountMap.getOrDefault(post.getPostId(), 0L);
+                    Long likeCount = likeCountMap.getOrDefault(post.getPostId(), 0L);
+                    return PostResponse.from(post, commentCount, likeCount);
                 })
                 .toList();
     }
