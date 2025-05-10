@@ -5,6 +5,8 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import swyp.hobbi.swyphobbiback.comment.domain.Comment;
+import swyp.hobbi.swyphobbiback.like.domain.Like;
 import swyp.hobbi.swyphobbiback.post_hobbytag.domain.PostHobbyTag;
 import swyp.hobbi.swyphobbiback.post_image.domain.PostImage;
 import swyp.hobbi.swyphobbiback.user.domain.User;
@@ -32,6 +34,8 @@ public class Post {
     @Column(nullable = false)
     private String postTitle;
 
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String postContent;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -41,6 +45,14 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<PostImage> postImages = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Like> likes = new ArrayList<>();
 
     @CreatedDate
     @Column(updatable = false)
