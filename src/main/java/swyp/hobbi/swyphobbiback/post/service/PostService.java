@@ -17,6 +17,7 @@ import swyp.hobbi.swyphobbiback.common.security.CustomUserDetails;
 import swyp.hobbi.swyphobbiback.hobbytag.domain.HobbyTag;
 import swyp.hobbi.swyphobbiback.hobbytag.repository.HobbyTagRepository;
 import swyp.hobbi.swyphobbiback.like.dto.LikeCountProjection;
+import swyp.hobbi.swyphobbiback.like.dto.LikeProjection;
 import swyp.hobbi.swyphobbiback.like.repository.LikeCountRepository;
 import swyp.hobbi.swyphobbiback.like.repository.LikeRepository;
 import swyp.hobbi.swyphobbiback.like.service.LikeService;
@@ -50,6 +51,7 @@ public class PostService {
     private final UserHobbyTagRepository userHobbyTagRepository;
     private final CommentRepository commentRepository;
     private final LikeCountRepository likeCountRepository;
+    private final LikeRepository likeRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
@@ -104,16 +106,17 @@ public class PostService {
 
         post.getPostHobbyTags().addAll(postHobbyTags);
 
-        return PostResponse.from(post, null, null);
+        return PostResponse.from(post, null, null, false);
     }
 
-    public PostResponse findPost(Long postId) {
+    public PostResponse findPost(CustomUserDetails userDetails, Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(PostNotFoundException::new);
         Long commentCount = commentRepository.countByPostId(postId);
         Long likeCount = likeService.getCount(postId);
+        Boolean liked = likeService.likedByUserAndPost(userDetails.getUserId(), postId);
 
-        return PostResponse.from(post, commentCount, likeCount);
+        return PostResponse.from(post, commentCount, likeCount, liked);
     }
 
     @Transactional
@@ -210,12 +213,15 @@ public class PostService {
                 .collect(Collectors.toMap(CommentCountProjection::getPostId, CommentCountProjection::getCommentCount));
         Map<Long, Long> likeCountMap = likeCountRepository.findLikeCountByPostIds(postIds).stream()
                 .collect(Collectors.toMap(LikeCountProjection::getPostId, LikeCountProjection::getLikeCount));
+        Map<Long, Boolean> likeYnMap = likeRepository.findLikeYnByPostIdsAndUserId(postIds, userId).stream()
+                .collect(Collectors.toMap(LikeProjection::getPostId, LikeProjection::getLikeYn));
 
         return posts.stream()
                 .map(post -> {
                     Long commentCount = commentCountMap.getOrDefault(post.getPostId(), 0L);
                     Long likeCount = likeCountMap.getOrDefault(post.getPostId(), 0L);
-                    return PostResponse.from(post, commentCount, likeCount);
+                    Boolean likeYn = likeYnMap.getOrDefault(post.getPostId(), false);
+                    return PostResponse.from(post, commentCount, likeCount, likeYn);
                 })
                 .toList();
     }
