@@ -31,11 +31,18 @@ public class LikeService {
             throw new AccessDeniedException(ErrorCode.FORBIDDEN.getMessage());
         }
 
-        Like like = Like.builder()
-                .user(userDetails.getUser())
-                .post(post)
-                .likeYn(true)
-                .build();
+        Like like = likeRepository.findByPost_PostIdAndUser_UserId(postId, userDetails.getUserId())
+                .orElse(null);
+
+        if(like != null) {
+            like.setLikeYnTrue();
+        } else {
+            like = Like.builder()
+                    .user(userDetails.getUser())
+                    .post(post)
+                    .likeYn(true)
+                    .build();
+        }
 
         likeRepository.save(like);
 
@@ -62,6 +69,11 @@ public class LikeService {
         likeCount.decrease();
 
         return LikeResponse.from(like);
+    }
+
+    public Boolean likedByUserAndPost(Long userId, Long postId) {
+        return likeRepository.findLikeYnByUserIdAndPostId(userId, postId)
+                .orElse(false);
     }
 
     public Long getCount(Long postId) {
