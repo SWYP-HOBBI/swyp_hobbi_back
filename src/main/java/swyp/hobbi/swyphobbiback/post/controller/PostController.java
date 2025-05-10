@@ -22,13 +22,13 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<Void> createPost(
+    public ResponseEntity<PostResponse> createPost(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestPart("request") PostCreateRequest request,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles
     ) {
-        postService.create(userDetails, request, imageFiles);
-        return ResponseEntity.ok().build();
+        PostResponse response = postService.create(userDetails, request, imageFiles);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{postId}")
@@ -57,7 +57,7 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PostResponse>> getPostsInfiniteScroll(
+    public ResponseEntity<List<PostResponse>> getAllPosts(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(value = "tagExist") boolean tagExist,
             @RequestParam(value = "lastPostId", required = false) Long lastPostId,
