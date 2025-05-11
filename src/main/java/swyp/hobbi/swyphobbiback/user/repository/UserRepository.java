@@ -8,6 +8,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByNickname(String nickname); //닉네임 중복 검사
     boolean existsByEmail(String email); //이메일 중복 검사
+    boolean existsByEmailAndIsDeletedFalse(String email);
 
     Optional<User> findByEmail(String email);
 }

@@ -100,4 +100,16 @@ public class JwtTokenProvider {
         return null;
     }
 
+    public String getAccessTokenFromHeaderOrCookie(HttpServletRequest request) {
+        // 1. Header 먼저 검사
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7); // "Bearer " 제거 후 반환
+        }
+
+        // 2. 쿠키에서 검사
+        return getAccessTokenFromCookies(request); // 기존 메서드
+    }
+
+
 }

@@ -17,6 +17,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Getter
+@Setter
 @Builder
 public class User {
 
@@ -70,5 +71,8 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<UserHobbyTag> userHobbyTags = new ArrayList<>();
+
+    @Column(nullable = false)
+    private Boolean isDeleted = false;  // 회원탈퇴 플래그
 
 }
