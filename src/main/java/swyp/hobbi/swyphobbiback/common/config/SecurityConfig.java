@@ -50,12 +50,18 @@ public class SecurityConfig {
                                 "/api/v1/email/**",
                                 "/api/v1/token/**",
                                 "/api/v1/post/*", // 단건 조회 허용
+                                "/api/v1/comments/**", // 댓글 목록 조회 무한 스크롤
                                 "/error/**",
                                 "/api/v1/user/login/oauth2/**",
                                 "/api/v1/user/login/oauth2/code/**",
                                 "/login/oauth2/**"
                         ).permitAll()
-                        .requestMatchers("/api/v1/post/**").authenticated()
+                        .requestMatchers(
+                                "/api/v1/post/**",
+                                "api/v1/comment/**",
+                                "api/v1/like/**",
+                                "api/v1/unlike/**"
+                        ).authenticated()
                         .anyRequest().authenticated() // 나머지는 인증 필요
 
                 ).addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, customUserDetailsService),

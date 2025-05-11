@@ -1,6 +1,8 @@
 package swyp.hobbi.swyphobbiback.token.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import swyp.hobbi.swyphobbiback.common.exception.CustomException;
 import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
@@ -12,14 +14,15 @@ import swyp.hobbi.swyphobbiback.token.repository.RefreshTokenRepository;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReissueService {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
 
-    public ReissueResponse reissue(ReissueRequest request) {
-        String refreshToken = request.getRefreshToken();
-
+    public ReissueResponse reissue(HttpServletRequest request) {
+        String refreshToken = request.getHeader("refreshToken");
+        log.info("Refresh token: {}", refreshToken);
         String email = jwtTokenProvider.getEmailFromToken(refreshToken); //토큰에서 이메일 추출
 
         RefreshToken dbToken = refreshTokenRepository.findById(email)

@@ -2,7 +2,6 @@ package swyp.hobbi.swyphobbiback.post.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -29,36 +28,36 @@ public class PostController {
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles
     ) {
         PostResponse response = postService.create(userDetails, request, imageFiles);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponse> getPostDetail(@PathVariable Long postId) {
-        return new ResponseEntity<>(postService.findPost(postId), HttpStatus.OK);
+        return ResponseEntity.ok(postService.findPost(postId));
     }
 
     @PutMapping("/{postId}")
-    public ResponseEntity<PostResponse> updatePost(
+    public ResponseEntity<Void> updatePost(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long postId,
             @RequestPart("request") PostUpdateRequest request,
             @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles
     ) {
-        PostResponse response = postService.update(userDetails, postId, request, imageFiles);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        postService.update(userDetails, postId, request, imageFiles);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity<PostResponse> deletePost(
+    public ResponseEntity<Void> deletePost(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long postId
     ) {
         postService.delete(userDetails, postId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping
-    public ResponseEntity<List<PostResponse>> getPostsInfiniteScroll(
+    public ResponseEntity<List<PostResponse>> getAllPosts(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(value = "tagExist") boolean tagExist,
             @RequestParam(value = "lastPostId", required = false) Long lastPostId,
