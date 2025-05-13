@@ -73,6 +73,9 @@ public class User {
     @Builder.Default
     private List<UserHobbyTag> userHobbyTags = new ArrayList<>();
 
+    @Column(nullable = false)
+    private Boolean isDeleted = false;  // 회원탈퇴 플래그
+
     // 기본 사용자 정보 수정
     public void updateProfile(String username, String gender, String mbti,
                               Integer birthYear,

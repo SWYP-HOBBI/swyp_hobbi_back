@@ -1,5 +1,6 @@
 package swyp.hobbi.swyphobbiback.user.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,15 +12,16 @@ import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
 import swyp.hobbi.swyphobbiback.common.exception.CustomException;
 import swyp.hobbi.swyphobbiback.email.domain.EmailVerification;
 import swyp.hobbi.swyphobbiback.email.repository.EmailVerificationRepository;
+import swyp.hobbi.swyphobbiback.token.repository.RefreshTokenRepository;
+import swyp.hobbi.swyphobbiback.user.domain.DeletedUser;
 import swyp.hobbi.swyphobbiback.user.domain.User;
+import swyp.hobbi.swyphobbiback.user.dto.*;
+import swyp.hobbi.swyphobbiback.user.repository.DeletedUserRepository;
 import swyp.hobbi.swyphobbiback.userhobbytag.domain.UserHobbyTag;
-import swyp.hobbi.swyphobbiback.user.dto.LoginRequest;
-import swyp.hobbi.swyphobbiback.user.dto.LoginResponse;
-import swyp.hobbi.swyphobbiback.user.dto.UserCreateRequest;
-import swyp.hobbi.swyphobbiback.user.dto.UserResponse;
 import swyp.hobbi.swyphobbiback.user.repository.UserRepository;
 import swyp.hobbi.swyphobbiback.token.service.TokenService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -28,9 +30,11 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final HobbyTagRepository hobbyTagRepository;
+    private final DeletedUserRepository deletedUserRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationRepository emailVerificationRepository;
     private final TokenService tokenService;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     public UserResponse signUp(UserCreateRequest request) {
 
@@ -38,7 +42,7 @@ public class UserService {
             throw new CustomException(ErrorCode.EMAIL_NOT_VERIFIED);
         }
 
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmailAndIsDeletedFalse(request.getEmail())) {
             throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
         if (userRepository.existsByNickname(request.getNickname())) {
@@ -57,6 +61,7 @@ public class UserService {
                 .birthDay(request.getBirthDay())
                 .gender(request.getGender())
                 .mbti(request.getMbti())
+                .isDeleted(false)
                 .role("User")
                 .isTagExist(!request.getHobbyTags().isEmpty())
                 .isBlocked(false)
@@ -86,6 +91,10 @@ public class UserService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(UserNotFoundException::new);
 
+        if (user.getIsDeleted()) {
+            throw new CustomException(ErrorCode.USER_ALREADY_DELETED); //이미 탈퇴한 사용자
+        }
+
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new CustomException(ErrorCode.PASSWORD_NOT_MATCH);
         }
@@ -99,4 +108,25 @@ public class UserService {
                 .build();
 
     }
+
+    @Transactional
+    public void delete(Long userId, UserDeleteRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // Refresh Token 삭제
+        refreshTokenRepository.deleteByEmail(user.getEmail());
+
+        // 탈퇴 처리
+        user.setIsDeleted(true);
+        userRepository.save(user);
+
+        DeletedUser deletedUser = DeletedUser.builder()
+                .userId(user.getUserId())
+                .reason(request.getReason())
+                .deletedAt(LocalDateTime.now())
+                .build();
+        deletedUserRepository.save(deletedUser); // 탈퇴 기록 저장
+    }
+
 }
