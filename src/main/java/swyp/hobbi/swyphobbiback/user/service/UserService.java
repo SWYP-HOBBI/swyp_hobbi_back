@@ -129,4 +129,9 @@ public class UserService {
         deletedUserRepository.save(deletedUser); // 탈퇴 기록 저장
     }
 
+    @Transactional
+    public void logout(String email) {
+        refreshTokenRepository.deleteByEmail(email);
+    }
+
 }

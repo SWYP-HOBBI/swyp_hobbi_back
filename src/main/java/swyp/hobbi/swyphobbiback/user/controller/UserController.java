@@ -1,6 +1,7 @@
 package swyp.hobbi.swyphobbiback.user.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -58,9 +59,7 @@ public class UserController {
     @PostMapping("/logout")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> logout(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        String email = userDetails.getEmail();
-        refreshTokenRepository.deleteByEmail(email); // DB에 저장된 refreshToken 삭제
-
+        userService.logout(userDetails.getEmail());
         return ResponseEntity.ok("로그아웃 되었습니다.");
     }
 
