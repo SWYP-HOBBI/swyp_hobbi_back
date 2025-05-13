@@ -15,6 +15,8 @@ import swyp.hobbi.swyphobbiback.common.exception.CommentNotFoundException;
 import swyp.hobbi.swyphobbiback.common.exception.PostNotFoundException;
 import swyp.hobbi.swyphobbiback.common.exception.UserNotFoundException;
 import swyp.hobbi.swyphobbiback.common.security.CustomUserDetails;
+import swyp.hobbi.swyphobbiback.notification.domain.NotificationType;
+import swyp.hobbi.swyphobbiback.notification.service.NotificationService;
 import swyp.hobbi.swyphobbiback.post.domain.Post;
 import swyp.hobbi.swyphobbiback.post.repository.PostRepository;
 import swyp.hobbi.swyphobbiback.user.domain.User;
@@ -31,6 +33,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public CommentResponse create(CustomUserDetails userDetails, CommentCreateRequest request) {
@@ -51,6 +54,15 @@ public class CommentService {
                 .commentContent(request.getContent())
                 .deleted(false)
                 .build();
+
+        Long receiverId = post.getUser().getUserId();
+        Long senderId = user.getUserId();
+
+        if(!receiverId.equals(senderId)) {
+            notificationService.sendNotification(
+                    receiverId, senderId, comment.getCommentContent(), NotificationType.COMMENT, post.getPostId()
+            );
+        }
 
         return CommentResponse.from(commentRepository.save(comment));
     }

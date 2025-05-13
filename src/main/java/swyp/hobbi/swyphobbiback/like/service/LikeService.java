@@ -12,6 +12,8 @@ import swyp.hobbi.swyphobbiback.like.domain.LikeCount;
 import swyp.hobbi.swyphobbiback.like.dto.LikeResponse;
 import swyp.hobbi.swyphobbiback.like.repository.LikeCountRepository;
 import swyp.hobbi.swyphobbiback.like.repository.LikeRepository;
+import swyp.hobbi.swyphobbiback.notification.domain.NotificationType;
+import swyp.hobbi.swyphobbiback.notification.service.NotificationService;
 import swyp.hobbi.swyphobbiback.post.domain.Post;
 import swyp.hobbi.swyphobbiback.post.repository.PostRepository;
 
@@ -21,6 +23,7 @@ public class LikeService {
     private final LikeRepository likeRepository;
     private final LikeCountRepository likeCountRepository;
     private final PostRepository postRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public LikeResponse likeOptimisticLock(CustomUserDetails userDetails, Long postId) {
@@ -43,6 +46,13 @@ public class LikeService {
                 .orElseGet(() -> LikeCount.init(postId, 0L));
         likeCount.increase();
         likeCountRepository.save(likeCount);
+
+        Long receiverId = post.getUser().getUserId();
+        Long senderId = userDetails.getUserId();
+
+        if(!receiverId.equals(senderId)) {
+            notificationService.sendNotification(receiverId, senderId, null, NotificationType.LIKE, post.getPostId());
+        }
 
         return LikeResponse.from(like);
     }
