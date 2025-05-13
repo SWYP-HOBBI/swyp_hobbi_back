@@ -46,15 +46,12 @@ public class CustomUserDetails implements UserDetails {
     }
 
     // 사용자 로그인 ID(email)
-    public String getEmail() { return user.getEmail(); }
+    public String getEmail() {
+        return user.getEmail();
+    }
 
     public Long getUserId() {
         return user.getUserId();
-    }
-
-    // 사용자 로그인 ID(email)
-    public String getEmail() {
-        return user.getEmail();
     }
 
     public String getNickname() {
