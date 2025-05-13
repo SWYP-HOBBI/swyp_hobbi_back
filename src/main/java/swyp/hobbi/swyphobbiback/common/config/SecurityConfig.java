@@ -58,7 +58,9 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers(
                                 "/api/v1/post/**",
-                                "api/v1/comment/**"
+                                "api/v1/comment/**",
+                                "api/v1/like/**",
+                                "api/v1/unlike/**"
                         ).authenticated()
                         .anyRequest().authenticated() // 나머지는 인증 필요
 
