@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import swyp.hobbi.swyphobbiback.hobbytag.domain.HobbyTag;
 import swyp.hobbi.swyphobbiback.userhobbytag.domain.UserHobbyTag;
 
 import java.time.LocalDateTime;
@@ -68,9 +69,36 @@ public class User {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<UserHobbyTag> userHobbyTags = new ArrayList<>();
+
+    // 기본 사용자 정보 수정
+    public void updateProfile(String username, String gender, String mbti,
+                              Integer birthYear,
+                              Integer birthMonth, Integer birthDay) {
+        this.username = username;
+        this.gender = gender;
+        this.mbti = mbti;
+        this.birthYear = birthYear;
+        this.birthMonth = birthMonth;
+        this.birthDay = birthDay;
+    }
+
+    // 취미 태그 수정
+    public void updateHobbyTags(List<HobbyTag> newTags) {
+        this.userHobbyTags.clear();
+
+        for (HobbyTag tag : newTags) {
+            UserHobbyTag userHobbyTag = UserHobbyTag.builder()
+                    .user(this)
+                    .hobbyTag(tag)
+                    .build();
+            this.userHobbyTags.add(userHobbyTag);
+        }
+
+        this.isTagExist = !newTags.isEmpty();
+    }
 
     @Column(nullable = false)
     private Boolean isDeleted = false;  // 회원탈퇴 플래그
