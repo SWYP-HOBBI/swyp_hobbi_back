@@ -50,11 +50,10 @@ public class NotificationService {
 
         Long notificationCount = getUnreadCount(receiverId);
 
-        sseService.sendNotification(receiverId, String.valueOf(notificationCount)); // 알림 개수 전송
-        sseService.sendNotification(receiverId, message); // 메시지 전송
+        sseService.sendNotification(receiverId, String.valueOf(notificationCount));
+        sseService.sendNotification(receiverId, message);
     }
     
-    // 무한 스크롤로 수정
     public List<NotificationResponse> getAllNotifications(CustomUserDetails userDetails, Long lastNotificationId, Integer pageSize) {
         Long userId = userDetails.getUserId();
         List<Long> notificationIds = fetchNotificationIds(userId, pageSize, lastNotificationId);
