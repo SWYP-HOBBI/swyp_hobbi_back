@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class SseService {
     private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
-    private static final Long SSE_EMITTER_TIME_OUT = 60 * 1000L; // 1분 타임아웃
+    private static final Long SSE_EMITTER_TIME_OUT = 30 * 60 * 1000L; // 30분 타임아웃
 
     public SseEmitter subscribe(Long userId) {
         SseEmitter emitter = new SseEmitter(SSE_EMITTER_TIME_OUT);
