@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import swyp.hobbi.swyphobbiback.user.domain.User;
+import swyp.hobbi.swyphobbiback.user.dto.NicknameProjection;
 
 import java.util.List;
 import java.util.Map;
@@ -16,9 +17,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     @Query(value = """
-        SELECT u.userId, u.nickname
+        SELECT u.userId AS userId, u.nickname AS nickname
         FROM User u
         WHERE u.userId IN(:userIds)
         """)
-    Map<Long, String> findNicknamesByIds(@Param("userIds") List<Long> userIds);
+    List<NicknameProjection> findNicknamesByIds(@Param("userIds") List<Long> userIds);
 }
