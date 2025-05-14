@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 public class CommentResponse {
     private Long commentId;
     private String content;
+    private Long userId;
     private String nickname;
     private String userImageUrl;
     private Long parentCommentId;
@@ -23,6 +24,7 @@ public class CommentResponse {
         CommentResponse response = new CommentResponse();
         response.commentId = comment.getCommentId();
         response.content = comment.getCommentContent();
+        response.userId = comment.getUser().getUserId();
         response.nickname = comment.getUser().getNickname();
         response.userImageUrl = comment.getUser().getUserImageUrl();
         response.parentCommentId = comment.getParentCommentId();
