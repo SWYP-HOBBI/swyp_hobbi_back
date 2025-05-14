@@ -1,6 +1,7 @@
 package swyp.hobbi.swyphobbiback.notification.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,13 +17,16 @@ import swyp.hobbi.swyphobbiback.notification.dto.NotificationResponse;
 import swyp.hobbi.swyphobbiback.notification.repository.NotificationCountRepository;
 import swyp.hobbi.swyphobbiback.notification.repository.NotificationRepository;
 import swyp.hobbi.swyphobbiback.user.domain.User;
+import swyp.hobbi.swyphobbiback.user.dto.NicknameProjection;
 import swyp.hobbi.swyphobbiback.user.repository.UserRepository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final NotificationCountRepository notificationCountRepository;
@@ -56,12 +60,14 @@ public class NotificationService {
     
     public List<NotificationResponse> getAllNotifications(CustomUserDetails userDetails, Long lastNotificationId, Integer pageSize) {
         Long userId = userDetails.getUserId();
+
         List<Long> notificationIds = fetchNotificationIds(userId, pageSize, lastNotificationId);
         List<Notification> notifications = notificationRepository.findAllNotifications(notificationIds);
         List<Long> senderIds = notifications.stream()
                 .map(Notification::getSenderId)
                 .toList();
-        Map<Long, String> senderNicknames = userRepository.findNicknamesByIds(senderIds);
+        Map<Long, String> senderNicknames = userRepository.findNicknamesByIds(senderIds).stream()
+                .collect(Collectors.toMap(NicknameProjection::getUserId, NicknameProjection::getNickname));
 
         return notifications.stream()
                 .map(notification -> {
@@ -83,6 +89,7 @@ public class NotificationService {
     @Transactional
     public NotificationResponse getNotificationAndDetails(CustomUserDetails userDetails, Long notificationId) {
         Long userId = userDetails.getUserId();
+        log.debug("userId : {}", userId);
 
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow();
