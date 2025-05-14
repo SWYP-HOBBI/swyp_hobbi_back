@@ -8,6 +8,7 @@ public enum ErrorCode {
     INVALID_INPUT_VALUE(400, "INVALID_INPUT_VALUE", "요청 값이 유효하지 않습니다."),
     EMAIL_NOT_VERIFIED(400, "EMAIL_NOT_VERIFIED", "이메일 인증이 완료되지 않았습니다."),
     INVALID_TOKEN(400, "INVALID_TOKEN", "유효하지 않은 토큰입니다."),
+    USER_ALREADY_DELETED(400, "USER_ALREADY_DELETED", "이미 탈퇴한 사용자입니다."),
     EXPIRED_TOKEN(401, "EXPIRED_TOKEN", "토큰이 만료되었습니다."),
     PASSWORD_NOT_MATCH(401, "PASSWORD_NOT_MATCH", "비밀번호가 일치하지 않습니다."),
     UNAUTHORIZED(401, "UNAUTHORIZED","인증이 필요합니다."),

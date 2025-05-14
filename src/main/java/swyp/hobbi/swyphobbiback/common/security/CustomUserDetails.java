@@ -40,9 +40,13 @@ public class CustomUserDetails implements UserDetails {
         return user.getPassword();
     }
 
-    // 사용자 로그인 ID(email)
     @Override
     public String getUsername() {
+        return user.getUsername();
+    }
+
+    // 사용자 로그인 ID(email)
+    public String getEmail() {
         return user.getEmail();
     }
 
