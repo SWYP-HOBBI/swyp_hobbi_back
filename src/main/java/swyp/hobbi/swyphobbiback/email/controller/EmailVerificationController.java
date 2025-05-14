@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
+import swyp.hobbi.swyphobbiback.common.exception.CustomException;
 import swyp.hobbi.swyphobbiback.email.domain.EmailVerification;
 import swyp.hobbi.swyphobbiback.email.dto.EmailCheckRequest;
 import swyp.hobbi.swyphobbiback.email.repository.EmailVerificationRepository;
@@ -31,28 +33,12 @@ public class EmailVerificationController {
         return ResponseEntity.ok("인증 메일 발송 완료!");
     }
 
-//    @GetMapping("/verify") //토큰으로 인증 처리
-//    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
-//        EmailVerification verification = emailVerificationRepository.findByToken(token)
-//                .orElseThrow(() -> new IllegalArgumentException("잘못된 인증 토큰입니다."));
-//
-//        if (verification.getExpiresAt().isBefore(LocalDateTime.now())) {
-//            return ResponseEntity.badRequest().body("인증 링크가 만료되었습니다.");
-//        }
-//
-//        verification.setVerified(true);
-//        emailVerificationRepository.save(verification);
-//
-//        return ResponseEntity.ok("이메일 인증이 완료되었습니다!");
-//
-//    }
-
     @GetMapping("/verify")
     public ResponseEntity<?> verifyEmail(@RequestParam String token,
                                          @RequestParam(required = false) String redirectUrl,
                                          HttpServletResponse response) throws IOException {
         EmailVerification verification = emailVerificationRepository.findByToken(token)
-                .orElseThrow(() -> new IllegalArgumentException("잘못된 인증 토큰입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_TOKEN));
 
         if (verification.getExpiresAt().isBefore(LocalDateTime.now())) {
             response.sendRedirect("http://localhost:3000/verify_fail");
@@ -85,7 +71,6 @@ public class EmailVerificationController {
         String message = isVerified
                 ? "이메일 인증이 완료되었습니다."
                 : "이메일 인증이 완료되지 않았습니다.";
-
 
         return ResponseEntity.ok(new EmailCheckResponse(message));
 

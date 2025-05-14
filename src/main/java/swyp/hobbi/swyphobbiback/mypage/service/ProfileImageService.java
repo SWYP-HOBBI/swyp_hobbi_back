@@ -45,7 +45,6 @@ public class ProfileImageService {
         return PREFIX_IMAGE_URL + BUCKET_NAME + "/" + fileName;
     }
 
-    //미사용 중, 향후 탈퇴/초기화 시 사용 가능
     public void deleteProfileImage(String imageUrl) {
         String key = imageUrl.replace(PREFIX_IMAGE_URL + BUCKET_NAME + "/", "");
         s3Client.deleteObject(new DeleteObjectRequest(BUCKET_NAME, key));

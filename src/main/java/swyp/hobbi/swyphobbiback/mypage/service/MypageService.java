@@ -99,7 +99,11 @@ public class MypageService {
         userRepository.save(user);
     }
 
-    public void updatePassword(Long userId, String newPassword) {
+    public void updatePassword(Long userId, String newPassword, String confirmPassword) {
+
+        if (!newPassword.equals(confirmPassword)) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE); //비밀번호와 비밀번호 확인 값 다를시
+        }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -113,11 +117,21 @@ public class MypageService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        String userImageUrl = profileImageService.uploadProfileImage(profileImage, user.getEmail());
-        user.setUserImageUrl(userImageUrl);
-        userRepository.save(user);
+        // null 또는 비어있으면 이미지 업데이트 없이 그대로 반환
+        if (profileImage == null || profileImage.isEmpty()) {
+            return user.getUserImageUrl(); // 기존 이미지 유지
+        }
 
-        return userImageUrl;
+        String uploadedUrl = profileImageService.uploadProfileImage(profileImage, user.getEmail());
+
+        try {
+            user.setUserImageUrl(uploadedUrl);
+            return uploadedUrl; //새로운 이미지 url 반환
+
+        } catch (Exception e) { // DB 반영 중 예외 발생 → 업로드된 이미지 삭제
+            profileImageService.deleteProfileImage(uploadedUrl);
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
 
     public boolean isNicknameDuplicate(String nickname) {
@@ -144,6 +158,13 @@ public class MypageService {
         boolean isLast = posts.size() < pageSize; // 마지막 페이지인지 체크
 
         return new MyPostsScrollResponse(myPosts, isLast);
+    }
+
+    public boolean checkPassword(Long userId, String currentPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        return passwordEncoder.matches(currentPassword, user.getPassword());
     }
 
 }

@@ -40,50 +40,43 @@ public class MypageController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/my-page/update")
-    public ResponseEntity<Void> updateMyPageInfo(@RequestBody MyPageUpdateRequest request) {
-        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
-                .getContext().getAuthentication().getPrincipal();
-
+    @PostMapping("/my-page/update")
+    public ResponseEntity<Void> updateMyPageInfo(@RequestBody MyPageUpdateRequest request,
+                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getUserId();
         mypageService.updateMyPageInfo(userId, request);
-
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/my-page/update/nickname") // 닉네임 변경
-    public ResponseEntity<Void> updateNickname(@RequestBody NicknameUpdateRequest request) {
-        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
-                .getContext().getAuthentication().getPrincipal();
+    public ResponseEntity<Void> updateNickname(@RequestBody NicknameUpdateRequest request,
+                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        Long userId = userDetails.getUserId();
-
-        mypageService.updateNickname(userId, request.getNickname());
+        mypageService.updateNickname(userDetails.getUserId(), request.getNickname());
         return ResponseEntity.ok().build();
+    }
 
+    @PostMapping("my-page/update/password/check") // 현재 비밀번호 확인
+    public ResponseEntity<PasswordCheckResponse> PasswordCheck(@RequestBody PasswordCheckRequest request,
+                                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
+        boolean check = mypageService.checkPassword(userDetails.getUserId(), request.getCurrentPassword());
+        if (!check) {
+            throw new CustomException(ErrorCode.PASSWORD_NOT_MATCH);
+        }
+        return ResponseEntity.ok(new PasswordCheckResponse(check));
     }
 
     @PutMapping("/my-page/update/password") // 비밀번호 변경
-    public ResponseEntity<Void> updatePassword(@RequestBody PasswordUpdateRequest request) {
-        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
-                .getContext().getAuthentication().getPrincipal();
-
-        Long userId = userDetails.getUserId();
-
-        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
-            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
-        }
-
-        mypageService.updatePassword(userId, request.getNewPassword());
+    public ResponseEntity<Void> updatePassword(@RequestBody PasswordUpdateRequest request,
+                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
+        mypageService.updatePassword(userDetails.getUserId(), request.getNewPassword(), request.getConfirmPassword());
         return ResponseEntity.ok().build();
     }
 
     @PostMapping(value = "/my-page/update/profile-image", consumes = "multipart/form-data")
-    public ResponseEntity<String> uploadProfileImage(@RequestPart MultipartFile newImage) {
-        Long userId = ((CustomUserDetails) SecurityContextHolder.getContext()
-                .getAuthentication().getPrincipal()).getUserId();
-
-        String userImageUrl = mypageService.uploadAndSaveProfileImage(userId, newImage);
+    public ResponseEntity<String> uploadProfileImage(@RequestPart MultipartFile profileImage,
+                                                     @AuthenticationPrincipal CustomUserDetails userDetails) {
+        String userImageUrl = mypageService.uploadAndSaveProfileImage(userDetails.getUserId(), profileImage);
         return ResponseEntity.ok(userImageUrl);
     }
 
@@ -108,5 +101,4 @@ public class MypageController {
         MyPostsScrollResponse response = mypageService.getMyPosts(userId, lastPostId, pageSize);
         return ResponseEntity.ok(response);
     }
-
 }
