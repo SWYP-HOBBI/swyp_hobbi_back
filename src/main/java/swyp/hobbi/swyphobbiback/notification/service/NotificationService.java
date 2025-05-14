@@ -89,7 +89,6 @@ public class NotificationService {
     @Transactional
     public NotificationResponse getNotificationAndDetails(CustomUserDetails userDetails, Long notificationId) {
         Long userId = userDetails.getUserId();
-        log.debug("userId : {}", userId);
 
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow();
@@ -121,14 +120,16 @@ public class NotificationService {
     public void markAllAsRead(CustomUserDetails userDetails) {
         Long userId = userDetails.getUserId();
 
-        notificationRepository.markAllReadByUserId(userId);
-        notificationRepository.deleteAllReadByUserId(userId);
+        if(notificationCountRepository.findById(userId).isPresent()) {
+            notificationRepository.markAllReadByUserId(userId);
+            notificationRepository.deleteAllReadByUserId(userId);
 
-        NotificationCount notificationCount = notificationCountRepository.findById(userId)
-                .orElseThrow();
-        notificationCount.initUnreadCount();
+            NotificationCount notificationCount = notificationCountRepository.findById(userId)
+                    .orElseThrow();
+            notificationCount.initUnreadCount();
 
-        sseService.sendNotification(userId, String.valueOf(notificationCount.getUnreadCount()));
+            sseService.sendNotification(userId, String.valueOf(notificationCount.getUnreadCount()));
+        }
     }
 
     @Transactional
