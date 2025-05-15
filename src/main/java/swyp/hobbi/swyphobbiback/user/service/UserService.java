@@ -23,6 +23,8 @@ import swyp.hobbi.swyphobbiback.token.service.TokenService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
+
 
 @Service
 @RequiredArgsConstructor
@@ -116,6 +118,9 @@ public class UserService {
 
         // Refresh Token 삭제
         refreshTokenRepository.deleteByEmail(user.getEmail());
+
+        // 닉네임 비식별 처리
+        user.setNickname("탈퇴한사용자_" + UUID.randomUUID().toString().substring(0, 6));
 
         // 탈퇴 처리
         user.setIsDeleted(true);
