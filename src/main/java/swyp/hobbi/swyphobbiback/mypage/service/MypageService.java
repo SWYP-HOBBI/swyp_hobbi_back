@@ -17,13 +17,16 @@ import swyp.hobbi.swyphobbiback.post.domain.Post;
 import swyp.hobbi.swyphobbiback.post.repository.PostRepository;
 import swyp.hobbi.swyphobbiback.user.domain.User;
 import swyp.hobbi.swyphobbiback.user.repository.UserRepository;
+import swyp.hobbi.swyphobbiback.userhobbytag.domain.UserHobbyTag;
 
 
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class MypageService {
 
     private final UserRepository userRepository;
@@ -86,7 +89,17 @@ public class MypageService {
         );
 
         List<HobbyTag> tags = hobbyTagRepository.findAllByHobbyTagNameIn(request.getHobbyTags());
+
+        log.debug("프론트에서 받은 태그: {}", request.getHobbyTags());
+        log.debug("DB 조회된 태그 개수: {}", tags.size());
+
         user.updateHobbyTags(tags);
+
+        for (UserHobbyTag tag : user.getUserHobbyTags()) {
+            log.debug(" - 연결된 태그: {}", tag.getHobbyTag().getHobbyTagName());
+        }
+
+        userRepository.save(user);
 
     }
 
