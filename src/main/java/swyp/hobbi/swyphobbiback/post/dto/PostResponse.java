@@ -21,10 +21,11 @@ public class PostResponse {
     private List<String> postHobbyTags;
     private Long commentCount;
     private Long likeCount;
+    private Boolean liked;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static PostResponse from(Post post, Long commentCount, Long likeCount) {
+    public static PostResponse from(Post post, Long commentCount, Long likeCount, Boolean liked) {
         PostResponse response = new PostResponse();
         response.postId = post.getPostId();
         response.nickname = post.getUser().getNickname();
@@ -40,6 +41,7 @@ public class PostResponse {
                 .toList();
         response.commentCount = commentCount == null ? 0L : commentCount;
         response.likeCount = likeCount == null ? 0L : likeCount;
+        response.liked = liked;
         response.createdAt = post.getCreatedAt();
         response.updatedAt = post.getUpdatedAt();
 
