@@ -16,6 +16,7 @@ public class CorsConfig implements WebMvcConfigurer {
                 corsRegistry.addMapping("/**") //모든 엔드포인트에 CORS 적용
                         .allowedOrigins("http://localhost:3000") //프론트 개발 주소
                         .allowedOrigins("https://swyp-hobbi-front.vercel.app")
+                        .allowedOrigins("https://hobbi.swygbro.com/")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true) //쿠키와 Authorization 헤더 허용
