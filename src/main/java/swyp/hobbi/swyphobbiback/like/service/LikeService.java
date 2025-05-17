@@ -57,8 +57,9 @@ public class LikeService {
         Long receiverId = post.getUser().getUserId();
         Long senderId = userDetails.getUserId();
 
+        String likeMessage = "";
         if(!receiverId.equals(senderId)) {
-            notificationService.sendNotification(receiverId, senderId, null, NotificationType.LIKE, post.getPostId());
+            notificationService.sendNotification(receiverId, senderId, likeMessage, NotificationType.LIKE, post.getPostId());
         }
 
         return LikeResponse.from(like);
