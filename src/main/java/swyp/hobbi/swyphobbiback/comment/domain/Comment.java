@@ -1,6 +1,7 @@
 package swyp.hobbi.swyphobbiback.comment.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -31,6 +32,10 @@ public class Comment {
     private Post post;
 
     private Long parentCommentId;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    @Size(max = 1000)
     private String commentContent;
     private Boolean deleted;
 
