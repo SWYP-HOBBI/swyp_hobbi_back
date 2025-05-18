@@ -40,7 +40,7 @@ public class PasswordResetController {
                         .orElseThrow(() -> new CustomException(ErrorCode.INVALID_TOKEN));
 
         if (!passwordResetService.validateToken(token)) {
-            response.sendRedirect("http://localhost:3000/verify_fail");
+            response.sendRedirect("http://swyp-hobbi-front.vercel.app/verify_fail");
             return;
         }
 
@@ -48,7 +48,7 @@ public class PasswordResetController {
         passwordResetTokenRepository.save(resetToken);
 
         String email = resetToken.getEmail();
-        String targetUrl = (redirectUrl != null) ? redirectUrl : "http://localhost:3000/verify_email?token=" + token + "&email=" + email + "&reset=true";
+        String targetUrl = (redirectUrl != null) ? redirectUrl : "http://swyp-hobbi-front.vercel.app/verify_email?token=" + token + "&email=" + email + "&reset=true";
 
         log.info("redirectUrl: {}", targetUrl);
         response.sendRedirect(targetUrl);

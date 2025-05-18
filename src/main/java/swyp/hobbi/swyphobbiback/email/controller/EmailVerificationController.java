@@ -41,7 +41,7 @@ public class EmailVerificationController {
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_TOKEN));
 
         if (verification.getExpiresAt().isBefore(LocalDateTime.now())) {
-            response.sendRedirect("http://localhost:3000/verify_fail");
+            response.sendRedirect("http://swyp-hobbi-front.vercel.app/verify_fail");
             return ResponseEntity.ok(response);
         }
 
@@ -50,7 +50,7 @@ public class EmailVerificationController {
 
         String email = verification.getEmail();
 
-        String targetUrl = (redirectUrl != null) ? redirectUrl : "http://localhost:3000/verify_email?token=" + token + "&email=" + email;
+        String targetUrl = (redirectUrl != null) ? redirectUrl : "http://swyp-hobbi-front.vercel.app/verify_email?token=" + token + "&email=" + email;
         response.sendRedirect(targetUrl);
 
         log.info("redirectUrl: {}", targetUrl);
