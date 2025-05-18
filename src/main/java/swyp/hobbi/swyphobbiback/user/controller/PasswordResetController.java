@@ -5,8 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
-import swyp.hobbi.swyphobbiback.common.exception.CustomException;
 import swyp.hobbi.swyphobbiback.email.dto.EmailCheckRequest;
 import swyp.hobbi.swyphobbiback.email.dto.EmailCheckResponse;
 import swyp.hobbi.swyphobbiback.user.domain.PasswordResetToken;
@@ -16,6 +14,8 @@ import swyp.hobbi.swyphobbiback.user.repository.PasswordResetTokenRepository;
 import swyp.hobbi.swyphobbiback.user.service.PasswordResetService;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/user/password")
@@ -36,21 +36,22 @@ public class PasswordResetController {
                             @RequestParam(required = false) String redirectUrl,
                             HttpServletResponse response) throws IOException {
 
-        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token)
-                        .orElseThrow(() -> new CustomException(ErrorCode.INVALID_TOKEN));
+        Optional<PasswordResetToken> optionalPasswordResetToken = passwordResetTokenRepository.findByToken(token);
 
-        if (!passwordResetService.validateToken(token)) {
+        //유효하지 않은 토큰이거나 만료된 토큰일 경우
+        if (optionalPasswordResetToken.isEmpty() ||
+                optionalPasswordResetToken.get().getExpiresAt().isBefore(LocalDateTime.now())) {
             response.sendRedirect("http://swyp-hobbi-front.vercel.app/verify_fail");
             return;
         }
 
+        PasswordResetToken resetToken = optionalPasswordResetToken.get();
         resetToken.setVerified(true);
         passwordResetTokenRepository.save(resetToken);
 
         String email = resetToken.getEmail();
         String targetUrl = (redirectUrl != null) ? redirectUrl : "http://swyp-hobbi-front.vercel.app/verify_email?token=" + token + "&email=" + email + "&reset=true";
 
-        log.info("redirectUrl: {}", targetUrl);
         response.sendRedirect(targetUrl);
     }
 
