@@ -1,6 +1,7 @@
 package swyp.hobbi.swyphobbiback.common.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -104,6 +105,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException ex) {
         log.error("IllegalStateException : {}", ex.getMessage());
+
+        if (ex.getCause() instanceof FileSizeLimitExceededException) {
+            ErrorResponse errorResponse = ErrorResponse.builder()
+                    .errorCode(ErrorCode.EXCEED_FILE_SIZE_LIMIT)
+                    .build();
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorCode(ErrorCode.INTERNAL_SERVER_ERROR)
