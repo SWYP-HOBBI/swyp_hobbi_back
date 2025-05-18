@@ -42,7 +42,7 @@ public class EmailVerificationController {
         //유효하지 않은 토큰이거나 만료된 토큰일 경우
         if (optionalVerification.isEmpty() ||
                 optionalVerification.get().getExpiresAt().isBefore(LocalDateTime.now())) {
-            response.sendRedirect("http://swyp-hobbi-front.vercel.app/verify_fail");
+            response.sendRedirect("http://localhost:3000/verify_fail");
             return;
         }
 
@@ -51,7 +51,7 @@ public class EmailVerificationController {
         emailVerificationRepository.save(verification);
 
         String email = verification.getEmail();
-        String targetUrl = (redirectUrl != null) ? redirectUrl : "http://swyp-hobbi-front.vercel.app/verify_email?token=" + token + "&email=" + email;
+        String targetUrl = (redirectUrl != null) ? redirectUrl : "http://localhost:3000/verify_email?token=" + token + "&email=" + email;
 
         response.sendRedirect(targetUrl);
     }
