@@ -19,14 +19,18 @@ public class MyPost {
     private String representativeImageUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Long commentCount;
+    private Long likeCount;
 
-    public static MyPost from(Post post) {
+    public static MyPost from(Post post, Long commentCount, Long likeCount) {
         return MyPost.builder()
                 .postId(post.getPostId())
                 .postTitle(post.getPostTitle())
                 .postContents(post.getPostContent())
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
+                .commentCount(commentCount == null ? 0 : commentCount)
+                .likeCount(likeCount == null ? 0 : likeCount)
                 .postHobbyTags(post.getPostHobbyTags().stream()
                         .map(pht -> pht.getHobbyTag().getHobbyTagName())
                         .toList())

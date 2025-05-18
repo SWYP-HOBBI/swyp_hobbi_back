@@ -8,10 +8,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import swyp.hobbi.swyphobbiback.comment.dto.CommentCountProjection;
+import swyp.hobbi.swyphobbiback.comment.repository.CommentRepository;
 import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
 import swyp.hobbi.swyphobbiback.common.exception.CustomException;
 import swyp.hobbi.swyphobbiback.hobbytag.domain.HobbyTag;
 import swyp.hobbi.swyphobbiback.hobbytag.repository.HobbyTagRepository;
+import swyp.hobbi.swyphobbiback.like.dto.LikeCountProjection;
+import swyp.hobbi.swyphobbiback.like.repository.LikeCountRepository;
 import swyp.hobbi.swyphobbiback.mypage.dto.*;
 import swyp.hobbi.swyphobbiback.post.domain.Post;
 import swyp.hobbi.swyphobbiback.post.repository.PostRepository;
@@ -21,6 +25,9 @@ import swyp.hobbi.swyphobbiback.userhobbytag.domain.UserHobbyTag;
 
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -34,6 +41,8 @@ public class MypageService {
     private final PasswordEncoder passwordEncoder;
     private final HobbyTagRepository hobbyTagRepository;
     private final ProfileImageService profileImageService;
+    private final CommentRepository commentRepository;
+    private final LikeCountRepository likeCountRepository;
 
     public MyPageResponse getMyPageInfo(Long userId) {
         User user = userRepository.findByIdWithHobbyTags(userId)
@@ -90,15 +99,7 @@ public class MypageService {
 
         List<HobbyTag> tags = hobbyTagRepository.findAllByHobbyTagNameIn(request.getHobbyTags());
 
-        log.debug("프론트에서 받은 태그: {}", request.getHobbyTags());
-        log.debug("DB 조회된 태그 개수: {}", tags.size());
-
         user.updateHobbyTags(tags);
-
-        for (UserHobbyTag tag : user.getUserHobbyTags()) {
-            log.debug(" - 연결된 태그: {}", tag.getHobbyTag().getHobbyTagName());
-        }
-
         userRepository.save(user);
 
     }
@@ -138,6 +139,7 @@ public class MypageService {
         String uploadedUrl = profileImageService.uploadProfileImage(profileImage, user.getEmail());
 
         try {
+
             user.setUserImageUrl(uploadedUrl);
             return uploadedUrl; //새로운 이미지 url 반환
 
@@ -156,6 +158,7 @@ public class MypageService {
 
         Pageable pageable = PageRequest.of(0, pageSize, Sort.by(Sort.Direction.DESC, "postId"));
 
+
         if (lastPostId == null) {
             // 첫 페이지
             posts = postRepository.findTopByUserId(userId, pageable);
@@ -164,8 +167,18 @@ public class MypageService {
             posts = postRepository.findNextByUserId(userId, lastPostId, pageable);
         }
 
+        List<Long> postIds = fetchPostIds(lastPostId, pageable.getPageSize());
+        Map<Long, Long> commentCountMap = commentRepository.countsByPostIds(postIds).stream()
+                .collect(Collectors.toMap(CommentCountProjection::getPostId, CommentCountProjection::getCommentCount));
+        Map<Long, Long> likeCountMap = likeCountRepository.findLikeCountByPostIds(postIds).stream()
+                .collect(Collectors.toMap(LikeCountProjection::getPostId, LikeCountProjection::getLikeCount));
+
         List<MyPost> myPosts = posts.stream()
-                .map(MyPost::from)
+                .map(post -> {
+                    Long commentCount = commentCountMap.getOrDefault(post.getPostId(), 0L);
+                    Long likeCount = likeCountMap.getOrDefault(post.getPostId(), 0L);
+                    return MyPost.from(post, commentCount, likeCount);
+                })
                 .toList();
 
         boolean isLast = posts.size() < pageSize; // 마지막 페이지인지 체크
@@ -178,6 +191,17 @@ public class MypageService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         return passwordEncoder.matches(currentPassword, user.getPassword());
+    }
+
+    public List<Long> fetchPostIds(Long lastPostId, Integer pageSize) {
+        if (lastPostId == null || lastPostId == 0) {
+            // 첫 페이지
+            return postRepository.findPostsByIds(pageSize);
+        } else {
+            // 이후 페이지 (cursor 기반)
+            return postRepository.findPostsByIds(lastPostId, pageSize);
+        }
+
     }
 
 }
