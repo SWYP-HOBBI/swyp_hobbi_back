@@ -9,8 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import swyp.hobbi.swyphobbiback.comment.dto.CommentCountProjection;
 import swyp.hobbi.swyphobbiback.comment.repository.CommentRepository;
-import swyp.hobbi.swyphobbiback.comment.service.CommentService;
 import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
+import swyp.hobbi.swyphobbiback.common.exception.CustomException;
 import swyp.hobbi.swyphobbiback.common.exception.FileUploadFailedException;
 import swyp.hobbi.swyphobbiback.common.exception.PostNotFoundException;
 import swyp.hobbi.swyphobbiback.common.security.CustomUserDetails;
@@ -37,6 +37,7 @@ import swyp.hobbi.swyphobbiback.userhobbytag.repository.UserHobbyTagRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,6 +54,7 @@ public class PostService {
     private final LikeCountRepository likeCountRepository;
     private final LikeRepository likeRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private static final long FILE_SIZE_LIMIT = 50L * 1024 * 1024;
 
     @Transactional
     public PostResponse create(CustomUserDetails userDetails, PostCreateRequest request, List<MultipartFile> imageFiles) {
@@ -63,6 +65,11 @@ public class PostService {
                 .build();
 
         postRepository.save(post);
+
+        List<Long> imageFileSizes = imageFiles.stream()
+                .map(MultipartFile::getSize)
+                .toList();
+        checkImageFileSize(imageFileSizes);
 
         List<String> uploadedImageUrls = new ArrayList<>();
         List<PostImage> postImages = post.getPostImages();
@@ -171,6 +178,12 @@ public class PostService {
             throw new FileUploadFailedException();
         }
 
+        List<String> imageUrls = postImages.stream()
+                .map(PostImage::getImageUrl)
+                .toList();
+        List<Long> imageFileSizes = postImageService.getImageFileSizes(imageUrls);
+        checkImageFileSize(imageFileSizes);
+
         post.getPostHobbyTags().clear();
 
         if(!request.getHobbyTagNames().isEmpty()) {
@@ -247,5 +260,16 @@ public class PostService {
             return postRepository.findPostIdsWithTags(hobbyTagIds, pageSize);
         }
         return postRepository.findPostIdsWithTags(hobbyTagIds, lastPostId, pageSize);
+    }
+
+    private static void checkImageFileSize(List<Long> imageFileSizes) {
+        long totalFileSize = 0L;
+        for(Long imageFileSize : imageFileSizes) {
+            totalFileSize += imageFileSize;
+        }
+
+        if(totalFileSize > FILE_SIZE_LIMIT) {
+            throw new CustomException(ErrorCode.EXCEED_FILE_SIZE_LIMIT);
+        }
     }
 }
