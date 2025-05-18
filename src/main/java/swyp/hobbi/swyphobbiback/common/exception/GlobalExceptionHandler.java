@@ -1,5 +1,6 @@
 package swyp.hobbi.swyphobbiback.common.exception;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
 import swyp.hobbi.swyphobbiback.common.error.ErrorResponse;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestControllerAdvice
@@ -122,15 +124,20 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ErrorResponse> handleCustomException(CustomException ex) {
+    public void handleCustomException(CustomException ex, HttpServletResponse response) throws IOException {
         log.error("CustomException : {}", ex.getMessage());
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode(ex.getErrorCode())
-                .build();
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(ex.getErrorCode().getStatus()));
+        // 이메일 인증 실패 시에는 실패 페이지로 리다이렉트
+        if (ex.getErrorCode() == ErrorCode.INVALID_TOKEN) {
+            response.sendRedirect("http://swyp-hobbi-front.vercel.app/verify_fail");
+        } else {
+            // 그 외 예외는 JSON 응답
+            response.setStatus(HttpStatus.valueOf(ex.getErrorCode().getStatus()).value());
+            response.setContentType("application/json");
+            response.getWriter().write("{\"errorCode\":\"" + ex.getErrorCode().name() + "\"}");
+        }
     }
+
 
 
     @ExceptionHandler(FileUploadFailedException.class)

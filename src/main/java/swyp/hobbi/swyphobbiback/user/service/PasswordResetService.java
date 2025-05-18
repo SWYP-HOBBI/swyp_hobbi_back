@@ -33,7 +33,7 @@ public class PasswordResetService {
         }
 
         String token = UUID.randomUUID().toString(); // 토큰 생성
-        String link = "http://110.165.16.69:8080/api/v1/user/password/verify?token=" + token;
+        String link = "http://hobbi.co.kr/api/v1/user/password/verify?token=" + token;
 
         PasswordResetToken resetToken = PasswordResetToken.builder()
                 .email(email)
