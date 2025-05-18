@@ -68,14 +68,4 @@ public class PostImageService {
         String prefixAndBucketName = PREFIX_IMAGE_URL + BUCKET_NAME + DIRECTORY_SEPARATOR;
         return imageUrl.replace(prefixAndBucketName, "");
     }
-
-    public List<Long> getImageFileSizes(List<String> imageUrls) {
-        List<Long> imageFileSizes = new ArrayList<>();
-        for (String imageUrl : imageUrls) {
-            S3Object s3Object = objectStorageClient.getObject(BUCKET_NAME, imageUrl);
-            imageFileSizes.add(s3Object.getObjectMetadata().getContentLength());
-        }
-
-        return imageFileSizes;
-    }
 }
