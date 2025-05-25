@@ -3,11 +3,13 @@ package swyp.hobbi.swyphobbiback.challenge.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import swyp.hobbi.swyphobbiback.user.domain.User;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "challenge")
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
@@ -17,16 +19,26 @@ public class Challenge {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long challengeId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Long userId;
 
-    @Enumerated(EnumType.STRING)
-    private ChallengeType challengeType;
+    private Integer challenge1Point;
+    private Integer challenge2Point;
+    private Integer challenge3Point;
 
-    private Double challengeBarPoint;
+    @Builder.Default
+    private Boolean challenge1Started = false;
+    @Builder.Default
+    private Boolean challenge2Started = false;
+    @Builder.Default
+    private Boolean challenge3Started = false;
 
-    private Boolean started;
+    @Builder.Default
+    private Boolean challenge1Achieved = false;
+    @Builder.Default
+    private Boolean challenge2Achieved = false;
+    @Builder.Default
+    private Boolean challenge3Achieved = false;
 
-    private Boolean achieved;
+    private LocalDateTime startedAt;
+    private Long remainedSeconds;
 }
