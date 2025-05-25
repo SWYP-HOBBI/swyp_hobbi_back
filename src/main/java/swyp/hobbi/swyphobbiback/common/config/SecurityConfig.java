@@ -62,7 +62,8 @@ public class SecurityConfig {
                                 "api/v1/like/**",
                                 "api/v1/unlike/**",
                                 "api/v1/sse/**",
-                                "api/v1/notifications/**"
+                                "api/v1/notifications/**",
+                                "api/v1/challenge/**"
                         ).authenticated()
                         .anyRequest().authenticated() // 나머지는 인증 필요
 
