@@ -49,6 +49,7 @@ public class SecurityConfig {
                                 "/api/v1/user/**",
                                 "/api/v1/email/**",
                                 "/api/v1/token/**",
+                                "/api/v1/oauth/session",
                                 "/api/v1/post/*", // 단건 조회 허용
                                 "/api/v1/comments/**", // 댓글 목록 조회 무한 스크롤
                                 "/error/**",
