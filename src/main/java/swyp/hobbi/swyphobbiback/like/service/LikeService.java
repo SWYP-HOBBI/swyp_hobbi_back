@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import swyp.hobbi.swyphobbiback.challenge.service.ChallengeService;
 import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
 import swyp.hobbi.swyphobbiback.common.exception.PostNotFoundException;
 import swyp.hobbi.swyphobbiback.common.security.CustomUserDetails;
@@ -24,6 +25,7 @@ public class LikeService {
     private final LikeCountRepository likeCountRepository;
     private final PostRepository postRepository;
     private final NotificationService notificationService;
+    private final ChallengeService challengeService;
 
     @Transactional
     public LikeResponse likeOptimisticLock(CustomUserDetails userDetails, Long postId) {
@@ -53,6 +55,8 @@ public class LikeService {
                 .orElseGet(() -> LikeCount.init(postId, 0L));
         likeCount.increase();
         likeCountRepository.save(likeCount);
+
+        challengeService.evaluateChallenges(userDetails.getUserId());
 
         Long receiverId = post.getUser().getUserId();
         Long senderId = userDetails.getUserId();

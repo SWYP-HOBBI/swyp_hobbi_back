@@ -7,6 +7,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import swyp.hobbi.swyphobbiback.challenge.service.ChallengeService;
 import swyp.hobbi.swyphobbiback.comment.dto.CommentCountProjection;
 import swyp.hobbi.swyphobbiback.comment.repository.CommentRepository;
 import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
@@ -54,6 +55,7 @@ public class PostService {
     private final LikeCountRepository likeCountRepository;
     private final LikeRepository likeRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final ChallengeService challengeService;
 
     @Transactional
     public PostResponse create(CustomUserDetails userDetails, PostCreateRequest request, List<MultipartFile> imageFiles) {
@@ -106,6 +108,8 @@ public class PostService {
         }
 
         post.getPostHobbyTags().addAll(postHobbyTags);
+
+        challengeService.evaluateChallenges(userDetails.getUserId());
 
         return PostResponse.from(post, null, null, false);
     }
