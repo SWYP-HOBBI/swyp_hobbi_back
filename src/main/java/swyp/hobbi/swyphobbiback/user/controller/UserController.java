@@ -1,14 +1,11 @@
 package swyp.hobbi.swyphobbiback.user.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import swyp.hobbi.swyphobbiback.common.security.CustomUserDetails;
-import swyp.hobbi.swyphobbiback.token.repository.RefreshTokenRepository;
 import swyp.hobbi.swyphobbiback.user.dto.*;
 import swyp.hobbi.swyphobbiback.user.repository.UserRepository;
 import swyp.hobbi.swyphobbiback.user.service.UserService;
@@ -20,7 +17,6 @@ public class UserController {
 
     private final UserService userService;
     private final UserRepository userRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
 
     @PostMapping("/validation/email") // 이메일 중복 검증
     public ResponseEntity<DuplicateCheckResponse> validateEmail(@RequestBody EmailCheckRequest emailCheckRequest) {
@@ -47,12 +43,10 @@ public class UserController {
     }
 
     @SecurityRequirement(name = "bearerAuth")
-    @DeleteMapping("/delete")
+    @DeleteMapping("/delete") //회원 탈퇴
     public ResponseEntity<UserDeleteResponse> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                          @RequestBody UserDeleteRequest request) {
-        Long userId = userDetails.getUserId();
-        userService.delete(userId, request);
-
+        userService.delete(userDetails.getUserId(), request);
         return ResponseEntity.ok(new UserDeleteResponse("회원 탈퇴가 완료되었습니다."));
     }
 
