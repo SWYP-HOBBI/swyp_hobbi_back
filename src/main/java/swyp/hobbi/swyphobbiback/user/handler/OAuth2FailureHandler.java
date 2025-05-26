@@ -27,11 +27,25 @@ public class OAuth2FailureHandler implements AuthenticationFailureHandler {
 
         System.out.println("소셜 로그인 실패: " + exception.getMessage());
 
-        String message = "소셜 로그인 실패";
+        String message = null;
+        String providerEmail = null;
+        String provider = null;
+
         if (exception instanceof OAuth2AuthenticationException oauthEx) {
             String errorCode = oauthEx.getError().getErrorCode();
+
             if ("USER_NOT_REGISTERED".equals(errorCode)) {
-                message = "회원가입되지 않은 사용자입니다.";
+                message = "연동된 계정이 없습니다.";
+
+                // 소셜 정보 세션에 저장
+                providerEmail = (String) request.getAttribute("socialEmail");
+                provider = (String) request.getAttribute("socialProvider");
+
+                if (providerEmail != null && provider != null) {
+                    request.getSession().setAttribute("pendingSocialEmail", providerEmail);
+                    request.getSession().setAttribute("pendingSocialProvider", provider);
+                }
+
             }
         }
 
