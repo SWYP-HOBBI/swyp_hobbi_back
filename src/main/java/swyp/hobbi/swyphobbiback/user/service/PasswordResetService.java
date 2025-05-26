@@ -28,7 +28,7 @@ public class PasswordResetService {
 
     public void sendPasswordResetLink(String email) {
 
-        if (!userRepository.existsByEmail(email)) {
+        if (!userRepository.existsByEmailAndIsDeletedFalse(email)) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND);
         }
 
@@ -49,12 +49,6 @@ public class PasswordResetService {
                 + "<a href=\"" + link + "\">비밀번호 재설정</a>";
 
         emailSendService.sendEmail(email, title, content); // 인증 이메일 전송
-    }
-
-    public boolean validateToken(String token) {
-        return passwordResetTokenRepository.findByToken(token)
-                .filter(t -> !t.getVerified() && t.getExpiresAt().isAfter(LocalDateTime.now()))
-                .isPresent();
     }
 
     public void resetPassword(String token, String newPassword) {
