@@ -17,14 +17,15 @@ import swyp.hobbi.swyphobbiback.user.domain.DeletedUser;
 import swyp.hobbi.swyphobbiback.user.domain.User;
 import swyp.hobbi.swyphobbiback.user.dto.*;
 import swyp.hobbi.swyphobbiback.user.repository.DeletedUserRepository;
-import swyp.hobbi.swyphobbiback.userhobbytag.domain.UserHobbyTag;
+import swyp.hobbi.swyphobbiback.user_hobbytag.domain.UserHobbyTag;
 import swyp.hobbi.swyphobbiback.user.repository.UserRepository;
 import swyp.hobbi.swyphobbiback.token.service.TokenService;
+import swyp.hobbi.swyphobbiback.user_rank.domain.UserRank;
+import swyp.hobbi.swyphobbiback.user_rank.repository.UserRankRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +38,7 @@ public class UserService {
     private final EmailVerificationRepository emailVerificationRepository;
     private final TokenService tokenService;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final UserRankRepository userRankRepository;
 
     public UserResponse signUp(UserCreateRequest request) {
 
@@ -44,7 +46,7 @@ public class UserService {
             throw new CustomException(ErrorCode.EMAIL_NOT_VERIFIED);
         }
 
-        if (userRepository.existsByEmailAndIsDeletedFalse(request.getEmail())) {
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
         if (userRepository.existsByNickname(request.getNickname())) {
@@ -71,13 +73,20 @@ public class UserService {
                 .build();
 
         List<HobbyTag> hobbyTags = hobbyTagRepository.findAllByHobbyTagNameIn(request.getHobbyTags());
-
         // UserHobbyTag 생성
         for (HobbyTag hobbyTag : hobbyTags) {
             user.getUserHobbyTags().add(new UserHobbyTag(user, hobbyTag));
         }
 
+        UserRank userRank = UserRank.builder()
+                .user(user)
+                .level(1)
+                .rank(UserRank.RankType.RED_HOBBI)
+                .exp(0)
+                .build();
+
         userRepository.save(user); // 유저 정보 저장
+        userRankRepository.save(userRank); // 유저 랭크 저장
 
         TokenPair tokens = tokenService.generateAndSaveTokens(user.getEmail()); // 자동로그인 위한 토큰 생성 및 저장
 
@@ -108,7 +117,6 @@ public class UserService {
                 .refreshToken(tokens.getRefreshToken())
                 .userId(user.getUserId())
                 .build();
-
     }
 
     @Transactional
