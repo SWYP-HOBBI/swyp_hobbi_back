@@ -9,6 +9,7 @@ import swyp.hobbi.swyphobbiback.challenge.dto.ChallengeCacheResponse;
 import swyp.hobbi.swyphobbiback.challenge.repository.ChallengeRepository;
 import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
 import swyp.hobbi.swyphobbiback.common.exception.CustomException;
+import swyp.hobbi.swyphobbiback.user_rank.service.UserRankService;
 
 import java.time.DayOfWeek;
 import java.time.Duration;
@@ -21,6 +22,7 @@ import java.time.temporal.TemporalAdjusters;
 public class ChallengeService {
     private final ChallengeRepository challengeRepository;
     private final ChallengeCacheService challengeCacheService;
+    private final UserRankService userRankService;
 
     public ChallengeCacheResponse getChallengeCache(Long userId) {
         LocalDateTime weekStart = getStartOfWeek(LocalDateTime.now());
@@ -69,7 +71,7 @@ public class ChallengeService {
 
             if(likeCount >= ChallengeDefaults.LIKE_STACK_COUNT) {
                 challenge.setChallenge1Achieved(true);
-                // rankService의 경험치 증가 로직 - 추가해주세요.
+                userRankService.addExp(userId, 10);
             }
         }
 
@@ -80,7 +82,7 @@ public class ChallengeService {
 
             if (count >= ChallengeDefaults.POST_SAME_TAGS_COUNT) {
                 challenge.setChallenge2Achieved(true);
-                // rankService의 경험치 증가 로직 - 추가해주세요.
+                userRankService.addExp(userId, 10);
             }
         }
 
@@ -91,7 +93,7 @@ public class ChallengeService {
 
             if (count >= ChallengeDefaults.POST_DIFF_TAGS_COUNT) {
                 challenge.setChallenge3Achieved(true);
-                // rankService의 경험치 증가 로직 - 추가해주세요.
+                userRankService.addExp(userId, 10);
             }
         }
 

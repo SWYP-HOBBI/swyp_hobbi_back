@@ -20,4 +20,11 @@ public class UserRankService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         return UserRankResponseDto.from(userRank);
     }
+
+    public void addExp(Long userId, int amount) {
+        UserRank userRank = userRankRepository.findByUserId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        userRank.updateExp(amount);
+        userRankRepository.save(userRank);
+    }
 }

@@ -10,4 +10,5 @@ import java.util.Optional;
 @Repository
 public interface UserRankRepository extends JpaRepository<UserRank, Long> {
     Optional<UserRank> findByUser(User user);
+    Optional<UserRank> findByUserId(Long userId);
 }
