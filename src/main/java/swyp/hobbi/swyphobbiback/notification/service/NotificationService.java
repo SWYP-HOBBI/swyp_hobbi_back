@@ -2,6 +2,7 @@ package swyp.hobbi.swyphobbiback.notification.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,8 @@ public class NotificationService {
     private final UserRepository userRepository;
     private final SseService sseService;
 
+    @Async("notificationExecute")
+    @Transactional
     public void sendNotification(Long receiverId, Long senderId, String message, NotificationType type, Long targetPostId) {
         Notification notification = Notification.builder()
                 .senderId(senderId)

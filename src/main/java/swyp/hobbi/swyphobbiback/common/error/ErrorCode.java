@@ -24,7 +24,8 @@ public enum ErrorCode {
     // 5xx
     INTERNAL_SERVER_ERROR(500, "INTERNAL_SERVER_ERROR","서버 에러가 발생했습니다."),
     FAILED_TO_UPLOAD_FILE(500, "FAILED_TO_UPLOAD_FILE", "파일 업로드에 실패하였습니다."),
-    EXCEED_FILE_SIZE_LIMIT(500, "EXCEED_FILE_SIZE_LIMIT", "파일 용량이 초과하였습니다.");
+    EXCEED_FILE_SIZE_LIMIT(500, "EXCEED_FILE_SIZE_LIMIT", "파일 용량이 초과되었습니다."),
+    REJECTED_BY_THREAD_POOL(500, "REJECTED_BY_THREAD_POOL", "스레드 작업이 거부되었습니다.");
 
     private final int status;
     private final String code;
