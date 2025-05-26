@@ -10,7 +10,6 @@ import swyp.hobbi.swyphobbiback.user.domain.User;
 import swyp.hobbi.swyphobbiback.user.dto.NicknameProjection;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -20,6 +19,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmailAndIsDeletedFalse(String email);
 
     Optional<User> findByEmail(String email);
+    Optional<User> findByUserIdAndIsDeletedFalse(Long userId);
 
     @Query(value = """
         SELECT u.userId AS userId, u.nickname AS nickname

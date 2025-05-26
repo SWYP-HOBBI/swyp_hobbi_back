@@ -28,11 +28,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter { //Access Tok
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        //이거String accessToken = jwtTokenProvider.getAccessTokenFromCookies(request); //HTTP 요청 헤더에서 Access Token 뽑아오기
-
         String accessToken = jwtTokenProvider.getAccessTokenFromHeaderOrCookie(request);
 
-        if (accessToken != null) {//액세스 토큰 존재시
+        if (accessToken != null) { //액세스 토큰 존재시
             try {
                 jwtTokenProvider.validateToken(accessToken); //토큰 유효성 검사
                 String email = jwtTokenProvider.getEmailFromToken(accessToken);

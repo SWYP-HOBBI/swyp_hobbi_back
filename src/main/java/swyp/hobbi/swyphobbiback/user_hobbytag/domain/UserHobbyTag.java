@@ -1,4 +1,4 @@
-package swyp.hobbi.swyphobbiback.userhobbytag.domain;
+package swyp.hobbi.swyphobbiback.user_hobbytag.domain;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

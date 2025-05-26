@@ -21,7 +21,6 @@ import swyp.hobbi.swyphobbiback.post.domain.Post;
 import swyp.hobbi.swyphobbiback.post.repository.PostRepository;
 import swyp.hobbi.swyphobbiback.user.domain.User;
 import swyp.hobbi.swyphobbiback.user.repository.UserRepository;
-import swyp.hobbi.swyphobbiback.userhobbytag.domain.UserHobbyTag;
 
 
 import java.util.List;
@@ -98,7 +97,6 @@ public class MypageService {
         );
 
         List<HobbyTag> tags = hobbyTagRepository.findAllByHobbyTagNameIn(request.getHobbyTags());
-
         user.updateHobbyTags(tags);
         userRepository.save(user);
 
@@ -136,15 +134,16 @@ public class MypageService {
             return user.getUserImageUrl(); // 기존 이미지 유지
         }
 
-        String uploadedUrl = profileImageService.uploadProfileImage(profileImage, user.getEmail());
-
+        String uploadedUrl = null;
         try {
-
+            uploadedUrl = profileImageService.uploadProfileImage(profileImage, user.getEmail());
             user.setUserImageUrl(uploadedUrl);
             return uploadedUrl; //새로운 이미지 url 반환
 
         } catch (Exception e) { // DB 반영 중 예외 발생 → 업로드된 이미지 삭제
-            profileImageService.deleteProfileImage(uploadedUrl);
+            if (uploadedUrl != null) {
+                profileImageService.deleteProfileImage(uploadedUrl);
+            }
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
@@ -157,8 +156,6 @@ public class MypageService {
         List<Post> posts;
 
         Pageable pageable = PageRequest.of(0, pageSize, Sort.by(Sort.Direction.DESC, "postId"));
-
-
         if (lastPostId == null) {
             // 첫 페이지
             posts = postRepository.findTopByUserId(userId, pageable);
@@ -189,7 +186,6 @@ public class MypageService {
     public boolean checkPassword(Long userId, String currentPassword) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
         return passwordEncoder.matches(currentPassword, user.getPassword());
     }
 
@@ -201,7 +197,5 @@ public class MypageService {
             // 이후 페이지 (cursor 기반)
             return postRepository.findPostsByIds(lastPostId, pageSize);
         }
-
     }
-
 }

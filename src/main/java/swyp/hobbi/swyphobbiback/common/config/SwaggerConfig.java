@@ -97,6 +97,74 @@ public class SwaggerConfig {
     }
 
     @Bean
+    public GroupedOpenApi notificationGroupedOpenApi() {
+        return GroupedOpenApi.builder()
+                .group("notification")
+                .pathsToMatch("/api/v1/notification/**")
+                .addOpenApiCustomizer(
+                        openApi ->
+                                openApi.setInfo(
+                                        new Info()
+                                                .title("notification api")
+                                                .description("알림 관련 API")
+                                                .version("0.0.1")
+                                )
+                )
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi commentGroupedOpenApi() {
+        return GroupedOpenApi.builder()
+                .group("comment")
+                .pathsToMatch("/api/v1/comment/**")
+                .addOpenApiCustomizer(
+                        openApi ->
+                                openApi.setInfo(
+                                        new Info()
+                                                .title("comment api")
+                                                .description("댓글 관련 API")
+                                                .version("0.0.1")
+                                )
+                )
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi likeGroupedOpenApi() {
+        return GroupedOpenApi.builder()
+                .group("like")
+                .pathsToMatch("/api/v1/like/**")
+                .addOpenApiCustomizer(
+                        openApi ->
+                                openApi.setInfo(
+                                        new Info()
+                                                .title("like api")
+                                                .description("좋아요 관련 API")
+                                                .version("0.0.1")
+                                )
+                )
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi oauthGroupedOpenApi() {
+        return GroupedOpenApi.builder()
+                .group("oauth")
+                .pathsToMatch("/api/v1/oauth/**")
+                .addOpenApiCustomizer(
+                        openApi ->
+                                openApi.setInfo(
+                                        new Info()
+                                                .title("oauth api")
+                                                .description("소셜로그인 관련 API")
+                                                .version("0.0.1")
+                                )
+                )
+                .build();
+    }
+
+    @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))

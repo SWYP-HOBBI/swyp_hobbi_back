@@ -11,7 +11,6 @@ import swyp.hobbi.swyphobbiback.challenge.service.ChallengeService;
 import swyp.hobbi.swyphobbiback.comment.dto.CommentCountProjection;
 import swyp.hobbi.swyphobbiback.comment.repository.CommentRepository;
 import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
-import swyp.hobbi.swyphobbiback.common.exception.CustomException;
 import swyp.hobbi.swyphobbiback.common.exception.FileUploadFailedException;
 import swyp.hobbi.swyphobbiback.common.exception.PostNotFoundException;
 import swyp.hobbi.swyphobbiback.common.security.CustomUserDetails;
@@ -32,13 +31,12 @@ import swyp.hobbi.swyphobbiback.post_image.domain.PostImage;
 import swyp.hobbi.swyphobbiback.post_image.event.PostImageUploadEvent;
 import swyp.hobbi.swyphobbiback.post_image.repository.PostImageRepository;
 import swyp.hobbi.swyphobbiback.post_image.service.PostImageService;
-import swyp.hobbi.swyphobbiback.userhobbytag.domain.UserHobbyTag;
-import swyp.hobbi.swyphobbiback.userhobbytag.repository.UserHobbyTagRepository;
+import swyp.hobbi.swyphobbiback.user_hobbytag.domain.UserHobbyTag;
+import swyp.hobbi.swyphobbiback.user_hobbytag.repository.UserHobbyTagRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @Service
