@@ -10,7 +10,6 @@ public class ChallengeCacheResponse {
     private ChallengeStatusResponse challenge1;
     private ChallengeStatusResponse challenge2;
     private ChallengeStatusResponse challenge3;
-    private Long remainedSeconds;
 
     @Data
     @AllArgsConstructor
@@ -24,8 +23,7 @@ public class ChallengeCacheResponse {
         return new ChallengeCacheResponse(
                 new ChallengeStatusResponse(cache.isChallenge1Started(), cache.isChallenge1Achieved(), cache.getChallenge1Point()),
                 new ChallengeStatusResponse(cache.isChallenge2Started(), cache.isChallenge2Achieved(), cache.getChallenge2Point()),
-                new ChallengeStatusResponse(cache.isChallenge3Started(), cache.isChallenge3Achieved(), cache.getChallenge3Point()),
-                cache.getRemainedSeconds()
+                new ChallengeStatusResponse(cache.isChallenge3Started(), cache.isChallenge3Achieved(), cache.getChallenge3Point())
         );
     }
 }

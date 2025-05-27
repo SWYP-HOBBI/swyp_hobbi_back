@@ -21,7 +21,6 @@ public class ChallengeCache implements Serializable {
     private boolean challenge1Achieved;
     private boolean challenge2Achieved;
     private boolean challenge3Achieved;
-    private Long remainedSeconds;
 
     public static ChallengeCache from(Challenge challenge) {
         ChallengeCache cache = new ChallengeCache();
@@ -34,7 +33,6 @@ public class ChallengeCache implements Serializable {
         cache.challenge1Achieved = challenge.getChallenge1Achieved();
         cache.challenge2Achieved = challenge.getChallenge2Achieved();
         cache.challenge3Achieved = challenge.getChallenge3Achieved();
-        cache.remainedSeconds = challenge.getRemainedSeconds();
 
         return cache;
     }
