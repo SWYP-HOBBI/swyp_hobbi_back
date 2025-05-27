@@ -31,8 +31,12 @@ import swyp.hobbi.swyphobbiback.post_image.domain.PostImage;
 import swyp.hobbi.swyphobbiback.post_image.event.PostImageUploadEvent;
 import swyp.hobbi.swyphobbiback.post_image.repository.PostImageRepository;
 import swyp.hobbi.swyphobbiback.post_image.service.PostImageService;
+import swyp.hobbi.swyphobbiback.user.repository.UserRepository;
 import swyp.hobbi.swyphobbiback.user_hobbytag.domain.UserHobbyTag;
 import swyp.hobbi.swyphobbiback.user_hobbytag.repository.UserHobbyTagRepository;
+import swyp.hobbi.swyphobbiback.user_rank.dto.UserLevelProjection;
+import swyp.hobbi.swyphobbiback.user_rank.repository.UserRankRepository;
+import swyp.hobbi.swyphobbiback.user_rank.service.UserRankService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +58,9 @@ public class PostService {
     private final LikeRepository likeRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final ChallengeService challengeService;
+    private final UserRankService userRankService;
+    private final UserRankRepository userRankRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public PostResponse create(CustomUserDetails userDetails, PostCreateRequest request, List<MultipartFile> imageFiles) {
@@ -106,10 +113,10 @@ public class PostService {
         }
 
         post.getPostHobbyTags().addAll(postHobbyTags);
-
+        Integer userLevel = userRankService.getUserLevel(userDetails.getUser());
         challengeService.evaluateChallenges(userDetails.getUserId());
 
-        return PostResponse.from(post, null, null, false);
+        return PostResponse.from(post, null, null, false, userLevel);
     }
 
     public PostResponse findPost(CustomUserDetails userDetails, Long postId) {
@@ -118,8 +125,9 @@ public class PostService {
         Long commentCount = commentRepository.countByPostId(postId);
         Long likeCount = likeService.getCount(postId);
         Boolean liked = likeService.likedByUserAndPost(userDetails.getUserId(), postId);
+        Integer userLevel = userRankService.getUserLevel(post.getUser());
 
-        return PostResponse.from(post, commentCount, likeCount, liked);
+        return PostResponse.from(post, commentCount, likeCount, liked, userLevel);
     }
 
     @Transactional
@@ -211,6 +219,7 @@ public class PostService {
     public List<PostResponse> findPostsInfiniteScroll(final CustomUserDetails userDetails, boolean tagExist, Long lastPostId, final Integer pageSize) {
         final Long userId = userDetails.getUserId();
         List<Long> postIds = fetchPostIds(tagExist, lastPostId, pageSize, userId);
+        List<Long> userIds = userRepository.findUserIdsByPostIds(postIds);
         List<Post> posts = postRepository.findPostWithHobbyAndUser(postIds);
         Map<Long, Long> commentCountMap = commentRepository.countsByPostIds(postIds).stream()
                 .collect(Collectors.toMap(CommentCountProjection::getPostId, CommentCountProjection::getCommentCount));
@@ -218,13 +227,17 @@ public class PostService {
                 .collect(Collectors.toMap(LikeCountProjection::getPostId, LikeCountProjection::getLikeCount));
         Map<Long, Boolean> likeYnMap = likeRepository.findLikeYnByPostIdsAndUserId(postIds, userId).stream()
                 .collect(Collectors.toMap(LikeProjection::getPostId, LikeProjection::getLikeYn));
+        Map<Long, Integer> userLevelMap = userRankRepository.findUserLevelByUserIds(userIds).stream()
+                .collect(Collectors.toMap(UserLevelProjection::getUserId, UserLevelProjection::getUserLevel));
 
         return posts.stream()
                 .map(post -> {
                     Long commentCount = commentCountMap.getOrDefault(post.getPostId(), 0L);
                     Long likeCount = likeCountMap.getOrDefault(post.getPostId(), 0L);
                     Boolean likeYn = likeYnMap.getOrDefault(post.getPostId(), false);
-                    return PostResponse.from(post, commentCount, likeCount, likeYn);
+                    Integer userLevel = userLevelMap.getOrDefault(post.getUser().getUserId(), 1);
+
+                    return PostResponse.from(post, commentCount, likeCount, likeYn, userLevel);
                 })
                 .toList();
     }
