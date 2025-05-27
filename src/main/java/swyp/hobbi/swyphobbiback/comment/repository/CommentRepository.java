@@ -34,7 +34,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Query(value = """
         SELECT DISTINCT c
         FROM Comment c
-        LEFT JOIN c.user u
+        LEFT JOIN FETCH c.user u
         WHERE c.commentId IN (:commentIds)
         """)
     List<Comment> findCommentWithUser(@Param("commentIds") List<Long> commentIds);
