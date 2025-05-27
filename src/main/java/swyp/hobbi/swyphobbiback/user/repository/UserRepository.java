@@ -39,4 +39,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "LEFT JOIN FETCH uht.hobbyTag " +
             "WHERE u.userId = :userId")
     Optional<User> findByIdWithHobbyTags(@Param("userId") Long userId);
+
+    @Query(value = """
+        SELECT u.userId FROM User u
+        JOIN Post p ON u.userId = p.user.userId
+        WHERE p.postId IN(:postIds)
+        """)
+    List<Long> findUserIdsByPostIds(@Param("postIds") List<Long> postIds);
+
+    @Query(value = """
+        SELECT u.userId FROM User u
+        JOIN Comment c ON u.userId = c.user.userId
+        WHERE c.commentId IN(:commentIds)
+        """)
+    List<Long> findUserIdsByCommentIds(@Param("commentIds") List<Long> commentIds);
 }
