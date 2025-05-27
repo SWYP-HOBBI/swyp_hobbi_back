@@ -31,4 +31,11 @@ public class UserRankService {
         userRank.updateExp(amount);
         userRankRepository.save(userRank);
     }
+
+    public Integer getUserLevel(User user) {
+        UserRank userRank = userRankRepository.findByUser(user)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        return userRank.getLevel();
+    }
 }
