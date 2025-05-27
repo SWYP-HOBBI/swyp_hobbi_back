@@ -17,10 +17,11 @@ public class CommentResponse {
     private Long parentCommentId;
     private Long postId;
     private Boolean deleted;
+    private Integer userLevel;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static CommentResponse from(Comment comment) {
+    public static CommentResponse from(Comment comment, Integer userLevel) {
         CommentResponse response = new CommentResponse();
         response.commentId = comment.getCommentId();
         response.content = comment.getCommentContent();
@@ -30,6 +31,7 @@ public class CommentResponse {
         response.parentCommentId = comment.getParentCommentId();
         response.postId = comment.getPost().getPostId();
         response.deleted = comment.getDeleted();
+        response.userLevel = userLevel;
         response.createdAt = comment.getCreatedAt();
         response.updatedAt = comment.getUpdatedAt();
 
