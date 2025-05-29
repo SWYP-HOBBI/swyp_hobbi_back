@@ -1,11 +1,13 @@
 package swyp.hobbi.swyphobbiback.user.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 @AllArgsConstructor
-public class OAuth2LoginResponse {
-    private String message;
-    private String accessToken;
+public class OauthLoginStatusResponse {
+    private Boolean kakao;
+    private Boolean google;
 }
