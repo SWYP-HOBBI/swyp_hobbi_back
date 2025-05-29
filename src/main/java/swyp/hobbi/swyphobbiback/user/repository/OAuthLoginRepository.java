@@ -9,5 +9,6 @@ import java.util.Optional;
 @Repository
 public interface OAuthLoginRepository extends JpaRepository<OauthLogin, Long> {
     Optional<OauthLogin> findByProviderEmailAndProvider(String providerEmail, String provider);
-    boolean existsByProviderEmailAndProvider(String socialEmail, String provider);
+    Boolean existsByProviderEmailAndProvider(String socialEmail, String provider);
+    Boolean existsByUserUserIdAndProvider(Long userId, String provider);
 }
