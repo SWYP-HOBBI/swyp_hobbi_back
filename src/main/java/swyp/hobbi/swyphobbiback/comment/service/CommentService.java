@@ -15,12 +15,19 @@ import swyp.hobbi.swyphobbiback.common.exception.CommentNotFoundException;
 import swyp.hobbi.swyphobbiback.common.exception.PostNotFoundException;
 import swyp.hobbi.swyphobbiback.common.exception.UserNotFoundException;
 import swyp.hobbi.swyphobbiback.common.security.CustomUserDetails;
+import swyp.hobbi.swyphobbiback.notification.domain.NotificationType;
+import swyp.hobbi.swyphobbiback.notification.service.NotificationService;
 import swyp.hobbi.swyphobbiback.post.domain.Post;
 import swyp.hobbi.swyphobbiback.post.repository.PostRepository;
 import swyp.hobbi.swyphobbiback.user.domain.User;
 import swyp.hobbi.swyphobbiback.user.repository.UserRepository;
+import swyp.hobbi.swyphobbiback.user_rank.dto.UserLevelProjection;
+import swyp.hobbi.swyphobbiback.user_rank.repository.UserRankRepository;
+import swyp.hobbi.swyphobbiback.user_rank.service.UserRankService;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.function.Predicate.*;
 
@@ -31,6 +38,9 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final UserRankRepository userRankRepository;
+    private final NotificationService notificationService;
+    private final UserRankService userRankService;
 
     @Transactional
     public CommentResponse create(CustomUserDetails userDetails, CommentCreateRequest request) {
@@ -52,7 +62,18 @@ public class CommentService {
                 .deleted(false)
                 .build();
 
-        return CommentResponse.from(commentRepository.save(comment));
+        Integer userLevel = userRankService.getUserLevel(userDetails.getUser());
+
+        Long receiverId = post.getUser().getUserId();
+        Long senderId = user.getUserId();
+
+        if(!receiverId.equals(senderId)) {
+            notificationService.sendNotification(
+                    receiverId, senderId, comment.getCommentContent(), NotificationType.COMMENT, post.getPostId()
+            );
+        }
+
+        return CommentResponse.from(commentRepository.save(comment), userLevel);
     }
 
     private Comment findParentComment(CommentCreateRequest request) {
@@ -79,16 +100,25 @@ public class CommentService {
                 .orElseThrow(CommentNotFoundException::new);
 
         comment.update(request.getContent());
+        Integer userLevel = userRankService.getUserLevel(userDetails.getUser());
 
-        return CommentResponse.from(comment);
+
+        return CommentResponse.from(comment, userLevel);
     }
 
     public List<CommentResponse> getCommentsInfiniteScroll(Long postId, Long lastCommentId, Integer pageSize) {
         List<Long> commentIds = fetchCommentIds(postId, pageSize, lastCommentId);
         List<Comment> comments = commentRepository.findCommentWithUser(commentIds);
+        List<Long> userIds = userRepository.findUserIdsByCommentIds(commentIds);
+
+        Map<Long, Integer> userLevelMap = userRankRepository.findUserLevelByUserIds(userIds).stream()
+                .collect(Collectors.toMap(UserLevelProjection::getUserId, UserLevelProjection::getUserLevel));
 
         return comments.stream()
-                .map(CommentResponse::from)
+                .map(comment -> {
+                    Integer userLevel = userLevelMap.getOrDefault(comment.getUser().getUserId(), 1);
+                    return CommentResponse.from(comment, userLevel);
+                })
                 .toList();
     }
 

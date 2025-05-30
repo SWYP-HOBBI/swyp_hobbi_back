@@ -35,6 +35,10 @@ public class Like {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
+    public void setLikeYnTrue() {
+        likeYn = true;
+    }
+
     public void setLikeYnFalse() {
         likeYn = false;
     }

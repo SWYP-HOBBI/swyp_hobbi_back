@@ -32,8 +32,8 @@ public class PostController {
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<PostResponse> getPostDetail(@PathVariable Long postId) {
-        return ResponseEntity.ok(postService.findPost(postId));
+    public ResponseEntity<PostResponse> getPostDetail(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long postId) {
+        return ResponseEntity.ok(postService.findPost(userDetails, postId));
     }
 
     @PutMapping("/{postId}")
@@ -41,9 +41,9 @@ public class PostController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long postId,
             @RequestPart("request") PostUpdateRequest request,
-            @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles
+            @RequestPart(value = "imageFiles", required = false) List<MultipartFile> newImageFiles
     ) {
-        postService.update(userDetails, postId, request, imageFiles);
+        postService.update(userDetails, postId, request, newImageFiles);
         return ResponseEntity.ok().build();
     }
 

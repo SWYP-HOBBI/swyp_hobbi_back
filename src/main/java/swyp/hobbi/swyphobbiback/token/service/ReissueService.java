@@ -8,7 +8,6 @@ import swyp.hobbi.swyphobbiback.common.exception.CustomException;
 import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
 import swyp.hobbi.swyphobbiback.common.security.JwtTokenProvider;
 import swyp.hobbi.swyphobbiback.token.domain.RefreshToken;
-import swyp.hobbi.swyphobbiback.token.dto.ReissueRequest;
 import swyp.hobbi.swyphobbiback.token.dto.ReissueResponse;
 import swyp.hobbi.swyphobbiback.token.repository.RefreshTokenRepository;
 
@@ -22,7 +21,6 @@ public class ReissueService {
 
     public ReissueResponse reissue(HttpServletRequest request) {
         String refreshToken = request.getHeader("refreshToken");
-        log.info("Refresh token: {}", refreshToken);
         String email = jwtTokenProvider.getEmailFromToken(refreshToken); //토큰에서 이메일 추출
 
         RefreshToken dbToken = refreshTokenRepository.findById(email)

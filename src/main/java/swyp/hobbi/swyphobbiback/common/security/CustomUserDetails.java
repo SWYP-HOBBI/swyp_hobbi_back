@@ -9,7 +9,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import swyp.hobbi.swyphobbiback.user.domain.User;
 import org.springframework.security.core.GrantedAuthority;
-import swyp.hobbi.swyphobbiback.userhobbytag.domain.UserHobbyTag;
+import swyp.hobbi.swyphobbiback.user_hobbytag.domain.UserHobbyTag;
 
 @Getter
 public class CustomUserDetails implements UserDetails {
@@ -40,9 +40,13 @@ public class CustomUserDetails implements UserDetails {
         return user.getPassword();
     }
 
-    // 사용자 로그인 ID(email)
     @Override
     public String getUsername() {
+        return user.getUsername();
+    }
+
+    // 사용자 로그인 ID(email)
+    public String getEmail() {
         return user.getEmail();
     }
 

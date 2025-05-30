@@ -4,7 +4,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Pageable;
 import swyp.hobbi.swyphobbiback.post.domain.Post;
+
 
 import java.util.List;
 
@@ -48,7 +50,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             """, nativeQuery = true)
     List<Long> findPostsByIds(final @Param("limit") Integer limit);
 
-
     @Query("""
             SELECT DISTINCT p
             FROM Post p
@@ -59,4 +60,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             ORDER BY p.postId DESC
             """)
     List<Post> findPostWithHobbyAndUser(@Param("postIds") List<Long> postIds);
+
+    // 처음 페이지 (lastPostId 없음)
+    @Query("SELECT p FROM Post p WHERE p.user.userId = :userId ORDER BY p.postId DESC")
+    List<Post> findTopByUserId(@Param("userId") Long userId, Pageable pageable);
+
+    // 다음 페이지 (lastPostId 기준으로 커서 이동)
+    @Query("SELECT p FROM Post p WHERE p.user.userId = :userId AND p.postId < :lastPostId ORDER BY p.postId DESC")
+    List<Post> findNextByUserId(@Param("userId") Long userId, @Param("lastPostId") Long lastPostId, Pageable pageable);
 }

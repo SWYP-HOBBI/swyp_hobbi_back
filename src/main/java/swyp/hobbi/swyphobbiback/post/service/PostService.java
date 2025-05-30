@@ -7,9 +7,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import swyp.hobbi.swyphobbiback.challenge.service.ChallengeService;
 import swyp.hobbi.swyphobbiback.comment.dto.CommentCountProjection;
 import swyp.hobbi.swyphobbiback.comment.repository.CommentRepository;
-import swyp.hobbi.swyphobbiback.comment.service.CommentService;
 import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
 import swyp.hobbi.swyphobbiback.common.exception.FileUploadFailedException;
 import swyp.hobbi.swyphobbiback.common.exception.PostNotFoundException;
@@ -17,6 +17,7 @@ import swyp.hobbi.swyphobbiback.common.security.CustomUserDetails;
 import swyp.hobbi.swyphobbiback.hobbytag.domain.HobbyTag;
 import swyp.hobbi.swyphobbiback.hobbytag.repository.HobbyTagRepository;
 import swyp.hobbi.swyphobbiback.like.dto.LikeCountProjection;
+import swyp.hobbi.swyphobbiback.like.dto.LikeProjection;
 import swyp.hobbi.swyphobbiback.like.repository.LikeCountRepository;
 import swyp.hobbi.swyphobbiback.like.repository.LikeRepository;
 import swyp.hobbi.swyphobbiback.like.service.LikeService;
@@ -30,8 +31,12 @@ import swyp.hobbi.swyphobbiback.post_image.domain.PostImage;
 import swyp.hobbi.swyphobbiback.post_image.event.PostImageUploadEvent;
 import swyp.hobbi.swyphobbiback.post_image.repository.PostImageRepository;
 import swyp.hobbi.swyphobbiback.post_image.service.PostImageService;
-import swyp.hobbi.swyphobbiback.userhobbytag.domain.UserHobbyTag;
-import swyp.hobbi.swyphobbiback.userhobbytag.repository.UserHobbyTagRepository;
+import swyp.hobbi.swyphobbiback.user.repository.UserRepository;
+import swyp.hobbi.swyphobbiback.user_hobbytag.domain.UserHobbyTag;
+import swyp.hobbi.swyphobbiback.user_hobbytag.repository.UserHobbyTagRepository;
+import swyp.hobbi.swyphobbiback.user_rank.dto.UserLevelProjection;
+import swyp.hobbi.swyphobbiback.user_rank.repository.UserRankRepository;
+import swyp.hobbi.swyphobbiback.user_rank.service.UserRankService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +55,12 @@ public class PostService {
     private final UserHobbyTagRepository userHobbyTagRepository;
     private final CommentRepository commentRepository;
     private final LikeCountRepository likeCountRepository;
+    private final LikeRepository likeRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final ChallengeService challengeService;
+    private final UserRankService userRankService;
+    private final UserRankRepository userRankRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public PostResponse create(CustomUserDetails userDetails, PostCreateRequest request, List<MultipartFile> imageFiles) {
@@ -103,17 +113,21 @@ public class PostService {
         }
 
         post.getPostHobbyTags().addAll(postHobbyTags);
+        Integer userLevel = userRankService.getUserLevel(userDetails.getUser());
+        challengeService.evaluateChallenges(userDetails.getUserId());
 
-        return PostResponse.from(post, null, null);
+        return PostResponse.from(post, null, null, false, userLevel);
     }
 
-    public PostResponse findPost(Long postId) {
+    public PostResponse findPost(CustomUserDetails userDetails, Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(PostNotFoundException::new);
         Long commentCount = commentRepository.countByPostId(postId);
         Long likeCount = likeService.getCount(postId);
+        Boolean liked = likeService.likedByUserAndPost(userDetails.getUserId(), postId);
+        Integer userLevel = userRankService.getUserLevel(post.getUser());
 
-        return PostResponse.from(post, commentCount, likeCount);
+        return PostResponse.from(post, commentCount, likeCount, liked, userLevel);
     }
 
     @Transactional
@@ -205,17 +219,25 @@ public class PostService {
     public List<PostResponse> findPostsInfiniteScroll(final CustomUserDetails userDetails, boolean tagExist, Long lastPostId, final Integer pageSize) {
         final Long userId = userDetails.getUserId();
         List<Long> postIds = fetchPostIds(tagExist, lastPostId, pageSize, userId);
+        List<Long> userIds = userRepository.findUserIdsByPostIds(postIds);
         List<Post> posts = postRepository.findPostWithHobbyAndUser(postIds);
         Map<Long, Long> commentCountMap = commentRepository.countsByPostIds(postIds).stream()
                 .collect(Collectors.toMap(CommentCountProjection::getPostId, CommentCountProjection::getCommentCount));
         Map<Long, Long> likeCountMap = likeCountRepository.findLikeCountByPostIds(postIds).stream()
                 .collect(Collectors.toMap(LikeCountProjection::getPostId, LikeCountProjection::getLikeCount));
+        Map<Long, Boolean> likeYnMap = likeRepository.findLikeYnByPostIdsAndUserId(postIds, userId).stream()
+                .collect(Collectors.toMap(LikeProjection::getPostId, LikeProjection::getLikeYn));
+        Map<Long, Integer> userLevelMap = userRankRepository.findUserLevelByUserIds(userIds).stream()
+                .collect(Collectors.toMap(UserLevelProjection::getUserId, UserLevelProjection::getUserLevel));
 
         return posts.stream()
                 .map(post -> {
                     Long commentCount = commentCountMap.getOrDefault(post.getPostId(), 0L);
                     Long likeCount = likeCountMap.getOrDefault(post.getPostId(), 0L);
-                    return PostResponse.from(post, commentCount, likeCount);
+                    Boolean likeYn = likeYnMap.getOrDefault(post.getPostId(), false);
+                    Integer userLevel = userLevelMap.getOrDefault(post.getUser().getUserId(), 1);
+
+                    return PostResponse.from(post, commentCount, likeCount, likeYn, userLevel);
                 })
                 .toList();
     }

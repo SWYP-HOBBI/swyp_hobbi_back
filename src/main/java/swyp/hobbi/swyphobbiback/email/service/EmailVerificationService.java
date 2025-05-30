@@ -18,8 +18,7 @@ public class EmailVerificationService {
     public void sendVerificationLink(String email) {
 
         String token = UUID.randomUUID().toString(); //랜덤 토큰 생성
-        //System.out.println("EmailToken >> " + token);
-        String link = "http://110.165.16.69:8080/api/v1/email/verify?token=" + token; //인증 링크 생성
+        String link = "http://hobbi.co.kr/api/v1/email/verify?token=" + token; //인증 링크 생성
 
         EmailVerification emailVerification = emailVerificationRepository.findByEmail(email)
                 .orElse(EmailVerification.builder().email(email).build());

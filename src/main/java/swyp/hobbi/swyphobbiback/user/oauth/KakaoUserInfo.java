@@ -1,7 +1,5 @@
 package swyp.hobbi.swyphobbiback.user.oauth;
 
-import com.nimbusds.openid.connect.sdk.claims.UserInfo;
-
 import java.util.Map;
 
 public class KakaoUserInfo implements OAuth2UserInfo {

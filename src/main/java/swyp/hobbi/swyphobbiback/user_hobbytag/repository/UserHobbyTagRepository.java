@@ -1,8 +1,8 @@
-package swyp.hobbi.swyphobbiback.userhobbytag.repository;
+package swyp.hobbi.swyphobbiback.user_hobbytag.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import swyp.hobbi.swyphobbiback.userhobbytag.domain.UserHobbyTag;
+import swyp.hobbi.swyphobbiback.user_hobbytag.domain.UserHobbyTag;
 
 import java.util.List;
 

@@ -12,10 +12,10 @@ import java.util.List;
 @Repository
 public interface LikeCountRepository extends JpaRepository<LikeCount, Long> {
     @Query(value = """
-        SELECT l.post_id AS postId, l.like_count AS likeCount FROM post_like_count l
-        JOIN post p on l.post_id = p.post_id
-        WHERE l.post_id IN (:postIds)
-        GROUP BY l.post_id
+        SELECT plc.post_id AS postId, plc.like_count AS likeCount FROM post_like_count plc
+        JOIN post p on plc.post_id = p.post_id
+        WHERE plc.post_id IN (:postIds)
+        GROUP BY plc.post_id
         """, nativeQuery = true)
     List<LikeCountProjection> findLikeCountByPostIds(@Param("postIds") List<Long> postIds);
 }
