@@ -12,6 +12,7 @@ import swyp.hobbi.swyphobbiback.common.security.CustomUserDetails;
 import swyp.hobbi.swyphobbiback.common.service.SseService;
 import swyp.hobbi.swyphobbiback.notification.domain.Notification;
 import swyp.hobbi.swyphobbiback.notification.domain.NotificationCount;
+import swyp.hobbi.swyphobbiback.notification.domain.NotificationPayload;
 import swyp.hobbi.swyphobbiback.notification.domain.NotificationType;
 import swyp.hobbi.swyphobbiback.notification.dto.NotificationReadRequest;
 import swyp.hobbi.swyphobbiback.notification.dto.NotificationResponse;
@@ -57,8 +58,14 @@ public class NotificationService {
 
         Long notificationCount = getUnreadCount(receiverId);
 
-        sseService.sendNotification(receiverId, String.valueOf(notificationCount));
-        sseService.sendNotification(receiverId, message);
+        NotificationPayload payload = NotificationPayload.builder()
+                .message(message)
+                .unreadCount(notificationCount)
+                .type(type)
+                .targetPostId(targetPostId)
+                .build();
+
+        sseService.sendNotification(receiverId, payload);
     }
     
     public List<NotificationResponse> getAllNotifications(CustomUserDetails userDetails, Long lastNotificationId, Integer pageSize) {
@@ -108,7 +115,10 @@ public class NotificationService {
 
         notificationRepository.delete(notification);
 
-        sseService.sendNotification(notification.getReceiverId(), String.valueOf(getUnreadCount(userId)));
+        NotificationPayload payload = NotificationPayload.builder()
+                .unreadCount(getUnreadCount(userId))
+                .build();
+        sseService.sendNotification(notification.getReceiverId(), payload);
 
         return NotificationResponse.from(notification, sender.getNickname());
     }
@@ -131,7 +141,10 @@ public class NotificationService {
                     .orElseThrow();
             notificationCount.initUnreadCount();
 
-            sseService.sendNotification(userId, String.valueOf(notificationCount.getUnreadCount()));
+            NotificationPayload payload = NotificationPayload.builder()
+                    .unreadCount(notificationCount.getUnreadCount())
+                    .build();
+            sseService.sendNotification(userId, payload);
         }
     }
 
@@ -149,6 +162,10 @@ public class NotificationService {
                     notificationRepository.delete(notification);
                 });
 
-        sseService.sendNotification(userId, String.valueOf(getUnreadCount(userId)));
+        NotificationPayload payload = NotificationPayload.builder()
+                .unreadCount(getUnreadCount(userId))
+                .build();
+
+        sseService.sendNotification(userId, payload);
     }
 }
