@@ -12,6 +12,7 @@ import swyp.hobbi.swyphobbiback.email.repository.EmailVerificationRepository;
 import java.time.LocalDateTime;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +21,7 @@ public class EmailVerificationService {
     private final EmailVerificationRepository emailVerificationRepository;
     private final EmailSendService emailSendService;
     private final RedisTemplate<String, String> redisTemplate;
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
     public void sendVerificationCode(String email) {
         String key = "email:limit:" + email;
@@ -39,12 +41,7 @@ public class EmailVerificationService {
         emailVerificationRepository.save(emailVerification);
 
         // 인증 이메일 전송
-        String title = "[Hobbi] 이메일 인증 코드";
-        String content = "<p>아래 인증 코드를 입력해주세요:</p>"
-                + "<h2>" + code + "</h2>"
-                + "<p>인증 코드는 3분간 유효합니다.</p>";
-
-        emailSendService.sendEmail(email, title, content);
+        emailSendService.sendEmail(email, EmailContentBuilder.getVerificationTitle(), EmailContentBuilder.buildVerificationContent(code));
     }
 
     @Transactional
@@ -61,13 +58,10 @@ public class EmailVerificationService {
     }
 
     public String generateAlphaNumericCode() {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        StringBuilder code = new StringBuilder();
         Random rnd = new Random();
-        for (int i = 0; i < 6; i++) {
-            code.append(chars.charAt(rnd.nextInt(chars.length())));
-        }
-        return code.toString();
+        return rnd.ints(6, 0, CHARACTERS.length())
+                .mapToObj(i -> String.valueOf(CHARACTERS.charAt(i)))
+                .collect(Collectors.joining());
     }
 
 }

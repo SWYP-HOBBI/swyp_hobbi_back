@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
 import swyp.hobbi.swyphobbiback.common.exception.CustomException;
+import swyp.hobbi.swyphobbiback.email.service.EmailContentBuilder;
 import swyp.hobbi.swyphobbiback.email.service.EmailSendService;
 import swyp.hobbi.swyphobbiback.email.service.EmailVerificationService;
 import swyp.hobbi.swyphobbiback.user.domain.PasswordResetCode;
@@ -50,12 +51,7 @@ public class PasswordResetService {
         passwordResetCodeRepository.save(resetCode);
 
         // 인증 이메일 전송
-        String title = "[Hobbi] 비밀번호 재설정 위한 이메일 인증";
-        String content = "<p>아래 인증 코드를 입력해주세요:</p>"
-                + "<h2>" + code + "</h2>"
-                + "<p>인증 코드는 3분간 유효합니다.</p>";
-
-        emailSendService.sendEmail(email, title, content); // 인증 이메일 전송
+        emailSendService.sendEmail(email, EmailContentBuilder.getVerificationTitle(), EmailContentBuilder.buildVerificationContent(code));
     }
 
     public void verifyResetCode(String email, String resetCode) {
