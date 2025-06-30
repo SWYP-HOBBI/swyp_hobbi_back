@@ -10,9 +10,8 @@ import swyp.hobbi.swyphobbiback.email.domain.EmailVerification;
 import swyp.hobbi.swyphobbiback.email.repository.EmailVerificationRepository;
 
 import java.time.LocalDateTime;
-import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +20,6 @@ public class EmailVerificationService {
     private final EmailVerificationRepository emailVerificationRepository;
     private final EmailSendService emailSendService;
     private final RedisTemplate<String, String> redisTemplate;
-    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
     public void sendVerificationCode(String email) {
         String key = "email:limit:" + email;
@@ -58,10 +56,7 @@ public class EmailVerificationService {
     }
 
     public String generateAlphaNumericCode() {
-        Random rnd = new Random();
-        return rnd.ints(6, 0, CHARACTERS.length())
-                .mapToObj(i -> String.valueOf(CHARACTERS.charAt(i)))
-                .collect(Collectors.joining());
+        return UUID.randomUUID().toString().replaceAll("-", "").substring(0, 6).toUpperCase();
     }
 
 }
