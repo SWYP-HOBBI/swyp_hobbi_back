@@ -3,20 +3,25 @@ package swyp.hobbi.swyphobbiback.post_image.service;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import swyp.hobbi.swyphobbiback.post.domain.Post;
 import swyp.hobbi.swyphobbiback.post_image.domain.PostImage;
 import swyp.hobbi.swyphobbiback.post_image.repository.PostImageRepository;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PostImageService {
     private static final String BUCKET_NAME = "hobbi-dev";
     private static final String PREFIX_FILE_NAME = "post";
     private static final String FILE_FORMAT = "%s%s%s%s";
+    private static final String GENERATE_FILE_FORMAT = "%s%s";
     private static final String FILE_SEPARATOR = "-";
     private static final String DIRECTORY_SEPARATOR = "/";
     private static final String PREFIX_IMAGE_URL = "https://hobbi-dev.s3.ap-northeast-2.amazonaws.com/";
@@ -41,19 +46,18 @@ public class PostImageService {
     }
 
     public String fileNameFormatter(MultipartFile file) {
+        String encodedFilename = URLEncoder.encode(file.getOriginalFilename(), StandardCharsets.UTF_8);
         return FILE_FORMAT.formatted(
                 PREFIX_FILE_NAME,
                 FILE_SEPARATOR,
                 UUID.randomUUID().toString(),
-                file.getOriginalFilename()
+                encodedFilename
         );
     }
 
-    public String generateObjectStorageUrl(String fileName) {
-        return FILE_FORMAT.formatted(
+    public String generateS3Url(String fileName) {
+        return GENERATE_FILE_FORMAT.formatted(
                 PREFIX_IMAGE_URL,
-                BUCKET_NAME,
-                DIRECTORY_SEPARATOR,
                 fileName
         );
     }
