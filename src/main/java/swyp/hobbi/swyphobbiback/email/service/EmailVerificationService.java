@@ -51,7 +51,6 @@ public class EmailVerificationService {
         verification.setVerified(true);
         emailVerificationRepository.save(verification);
 
-        emailVerificationRepository.deleteByEmail(email);
         redisTemplate.delete("email:limit:" + email);
     }
 
