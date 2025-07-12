@@ -14,9 +14,9 @@ import swyp.hobbi.swyphobbiback.common.security.CustomUserDetails;
 public class ChallengeController {
     private final ChallengeService challengeService;
 
-    @PostMapping("/start/{challengeNumber}")
-    public ResponseEntity<Void> startChallenge(@PathVariable int challengeNumber, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        challengeService.startSpecificChallenge(userDetails.getUserId(), challengeNumber);
+    @PostMapping("/start")
+    public ResponseEntity<Void> startChallenge(@RequestParam("challengeType") String challengeType, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        challengeService.startSpecificChallenge(userDetails.getUserId(), challengeType);
         return ResponseEntity.ok().build();
     }
 
