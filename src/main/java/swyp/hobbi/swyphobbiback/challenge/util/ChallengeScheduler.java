@@ -27,15 +27,15 @@ public class ChallengeScheduler {
         List<Challenge> oldChallenges = challengeRepository.findByStartedAtBefore(weekStart);
 
         for(Challenge challenge : oldChallenges){
-            challenge.setChallenge1Started(false);
-            challenge.setChallenge2Started(false);
-            challenge.setChallenge3Started(false);
-            challenge.setChallenge1Achieved(false);
-            challenge.setChallenge2Achieved(false);
-            challenge.setChallenge3Achieved(false);
-            challenge.setChallenge1Point(0);
-            challenge.setChallenge2Point(0);
-            challenge.setChallenge3Point(0);
+            challenge.setHobbyShowOffStarted(false);
+            challenge.setHobbyRoutinerStarted(false);
+            challenge.setHobbyRichStarted(false);
+            challenge.setHobbyShowOffAchieved(false);
+            challenge.setHobbyRoutinerAchieved(false);
+            challenge.setHobbyRichAchieved(false);
+            challenge.setHobbyShowOffPoint(0);
+            challenge.setHobbyRoutinerPoint(0);
+            challenge.setHobbyRichPoint(0);
             challenge.setStartedAt(weekStart);
             challenge.setRemainedSeconds(calculateRemainedAt(weekStart).getSeconds());
 

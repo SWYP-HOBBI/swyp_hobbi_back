@@ -7,9 +7,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class ChallengeCacheResponse {
-    private ChallengeStatusResponse challenge1;
-    private ChallengeStatusResponse challenge2;
-    private ChallengeStatusResponse challenge3;
+    private ChallengeStatusResponse hobbyShowOff;
+    private ChallengeStatusResponse hobbyRoutiner;
+    private ChallengeStatusResponse hobbyRich;
 
     @Data
     @AllArgsConstructor
@@ -21,9 +21,9 @@ public class ChallengeCacheResponse {
 
     public static ChallengeCacheResponse from(ChallengeCache cache) {
         return new ChallengeCacheResponse(
-                new ChallengeStatusResponse(cache.isChallenge1Started(), cache.isChallenge1Achieved(), cache.getChallenge1Point()),
-                new ChallengeStatusResponse(cache.isChallenge2Started(), cache.isChallenge2Achieved(), cache.getChallenge2Point()),
-                new ChallengeStatusResponse(cache.isChallenge3Started(), cache.isChallenge3Achieved(), cache.getChallenge3Point())
+                new ChallengeStatusResponse(cache.isHobbyShowOffStarted(), cache.isHobbyShowOffAchieved(), cache.getHobbyShowOffPoint()),
+                new ChallengeStatusResponse(cache.isHobbyRoutinerStarted(), cache.isHobbyRoutinerAchieved(), cache.getHobbyRoutinerPoint()),
+                new ChallengeStatusResponse(cache.isHobbyRichStarted(), cache.isHobbyRichAchieved(), cache.getHobbyRichPoint())
         );
     }
 }
