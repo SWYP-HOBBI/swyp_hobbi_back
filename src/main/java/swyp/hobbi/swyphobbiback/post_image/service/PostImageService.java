@@ -12,6 +12,7 @@ import swyp.hobbi.swyphobbiback.post_image.repository.PostImageRepository;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
 import java.util.UUID;
 
 @Service
@@ -46,12 +47,14 @@ public class PostImageService {
     }
 
     public String fileNameFormatter(MultipartFile file) {
-        String encodedFilename = URLEncoder.encode(file.getOriginalFilename(), StandardCharsets.UTF_8);
+        String originalFilename = file.getOriginalFilename();
+        String sanitizedFilename = sanitizeFilename(originalFilename);
+
         return FILE_FORMAT.formatted(
                 PREFIX_FILE_NAME,
                 FILE_SEPARATOR,
                 UUID.randomUUID().toString(),
-                encodedFilename
+                sanitizedFilename
         );
     }
 
@@ -65,5 +68,28 @@ public class PostImageService {
     public String getSuffixImageUrl(String imageUrl) {
         String prefixAndBucketName = PREFIX_IMAGE_URL + BUCKET_NAME + DIRECTORY_SEPARATOR;
         return imageUrl.replace(prefixAndBucketName, "");
+    }
+
+    private String sanitizeFilename(String originalFilename) {
+        if(originalFilename == null) {
+            return "unnamed-file";
+        }
+
+        String extension = "";
+        int dotIndex = originalFilename.lastIndexOf('.');
+        if(dotIndex >= 0) {
+            extension = originalFilename.substring(dotIndex);
+            originalFilename = originalFilename.substring(0, dotIndex);
+        }
+
+        String sanitizedFilename = Normalizer.normalize(originalFilename, Normalizer.Form.NFD)
+                .replaceAll("[^\\p{ASCII}]", "")
+                .replaceAll("[^a-zA-Z0-9-_]", "_");
+
+        if(sanitizedFilename.isBlank()) {
+            sanitizedFilename = UUID.randomUUID().toString();
+        }
+
+        return sanitizedFilename + extension;
     }
 }
