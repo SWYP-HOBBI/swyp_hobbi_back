@@ -10,8 +10,6 @@ import swyp.hobbi.swyphobbiback.user.dto.LoginResponse;
 import swyp.hobbi.swyphobbiback.user.dto.OauthLoginStatusResponse;
 import swyp.hobbi.swyphobbiback.user.service.OAuthService;
 
-import java.util.Map;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/oauth")
