@@ -21,6 +21,11 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class PasswordResetService {
 
+    private static final String RATE_LIMIT_PREFIX = "email:limit:";
+    private static final String RATE_LIMIT_FLAG = "1";
+    private static final long RATE_LIMIT_TTL_SECONDS = 30;
+    private static final long CODE_EXPIRATION_MINUTES = 3;
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final PasswordResetCodeRepository passwordResetCodeRepository;
@@ -34,11 +39,11 @@ public class PasswordResetService {
             throw new CustomException(ErrorCode.USER_NOT_FOUND);
         }
 
-        String key = "email:limit:" + email;
+        String key = rateLimitKey(email);
         if (Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
             throw new CustomException(ErrorCode.TOO_MANY_REQUESTS);
         }
-        redisTemplate.opsForValue().set(key, "1", 30, TimeUnit.SECONDS); // rate limit 기록 (30초 유지)
+        redisTemplate.opsForValue().set(key, RATE_LIMIT_FLAG, RATE_LIMIT_TTL_SECONDS, TimeUnit.SECONDS); // rate limit 기록 (30초 유지)
 
         String code = emailVerificationService.generateAlphaNumericCode(); // 인증코드 생성
 
@@ -46,7 +51,7 @@ public class PasswordResetService {
                 .orElse(PasswordResetCode.builder().email(email).build());
 
         resetCode.setCode(code);
-        resetCode.setExpiresAt(LocalDateTime.now().plusMinutes(3));
+        resetCode.setExpiresAt(LocalDateTime.now().plusMinutes(CODE_EXPIRATION_MINUTES));
         resetCode.setVerified(false);
         passwordResetCodeRepository.save(resetCode);
 
@@ -62,7 +67,7 @@ public class PasswordResetService {
         code.setVerified(true);
         passwordResetCodeRepository.save(code);
 
-        redisTemplate.delete("email:limit:" + email);
+        redisTemplate.delete(rateLimitKey(email));
     }
 
     public void resetPassword(String email, String resetCode, String newPassword) {
@@ -78,5 +83,9 @@ public class PasswordResetService {
         userRepository.save(user);
 
         passwordResetCodeRepository.deleteByEmail(email);
+    }
+
+    private String rateLimitKey(String email) {
+        return RATE_LIMIT_PREFIX + email;
     }
 }
