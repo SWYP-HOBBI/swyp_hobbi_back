@@ -41,5 +41,4 @@ public class Challenge {
     private Boolean hobbyRichAchieved = false;
 
     private LocalDateTime startedAt;
-    private Long remainedSeconds;
 }
