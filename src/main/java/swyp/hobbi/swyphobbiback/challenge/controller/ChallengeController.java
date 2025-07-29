@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import swyp.hobbi.swyphobbiback.challenge.dto.ChallengeCacheResponse;
+import swyp.hobbi.swyphobbiback.challenge.dto.ChallengeResponse;
 import swyp.hobbi.swyphobbiback.challenge.service.ChallengeService;
 import swyp.hobbi.swyphobbiback.common.security.CustomUserDetails;
 
@@ -21,8 +21,8 @@ public class ChallengeController {
     }
 
     @GetMapping
-    public ResponseEntity<ChallengeCacheResponse> getAllChallenges(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        ChallengeCacheResponse challengeCache = challengeService.getChallengeCache(userDetails.getUserId());
-        return ResponseEntity.ok(challengeCache);
+    public ResponseEntity<ChallengeResponse> getAllChallenges(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        ChallengeResponse response = challengeService.getChallenge(userDetails.getUserId());
+        return ResponseEntity.ok(response);
     }
 }
