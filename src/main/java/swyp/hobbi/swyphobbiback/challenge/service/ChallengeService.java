@@ -2,11 +2,11 @@ package swyp.hobbi.swyphobbiback.challenge.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import swyp.hobbi.swyphobbiback.challenge.domain.Challenge;
 import swyp.hobbi.swyphobbiback.challenge.domain.ChallengeDefaults;
 import swyp.hobbi.swyphobbiback.challenge.domain.ChallengeType;
-import swyp.hobbi.swyphobbiback.challenge.dto.ChallengeCache;
-import swyp.hobbi.swyphobbiback.challenge.dto.ChallengeCacheResponse;
+import swyp.hobbi.swyphobbiback.challenge.dto.ChallengeResponse;
 import swyp.hobbi.swyphobbiback.challenge.repository.ChallengeRepository;
 import swyp.hobbi.swyphobbiback.common.error.ErrorCode;
 import swyp.hobbi.swyphobbiback.common.exception.CustomException;
@@ -22,23 +22,18 @@ import java.time.temporal.TemporalAdjusters;
 @RequiredArgsConstructor
 public class ChallengeService {
     private final ChallengeRepository challengeRepository;
-    private final ChallengeCacheService challengeCacheService;
     private final UserRankService userRankService;
 
-    public ChallengeCacheResponse getChallengeCache(Long userId) {
+    public ChallengeResponse getChallenge(Long userId) {
         LocalDateTime weekStart = getStartOfWeek(LocalDateTime.now());
-        ChallengeCache cache = challengeCacheService.getCache(userId, weekStart);
 
-        if(cache == null) {
-            Challenge challenge = challengeRepository.findByUserIdAndStartedAt(userId, weekStart)
-                    .orElseGet(() -> createChallenge(userId, weekStart));
-            challengeCacheService.updateCache(userId, weekStart, ChallengeCache.from(challenge));
-            cache = challengeCacheService.getCache(userId, weekStart);
-        }
+        Challenge challenge = challengeRepository.findByUserIdAndStartedAt(userId, weekStart)
+                .orElseGet(() -> createChallenge(userId, weekStart));
 
-        return ChallengeCacheResponse.from(cache);
+        return ChallengeResponse.of(challenge);
     }
 
+    @Transactional
     public void startSpecificChallenge(Long userId, String challengeType) {
         LocalDateTime weekStart = getStartOfWeek(LocalDateTime.now());
         Challenge challenge = challengeRepository.findByUserIdAndStartedAt(userId, weekStart)
@@ -53,9 +48,9 @@ public class ChallengeService {
         }
 
         challengeRepository.save(challenge);
-        challengeCacheService.updateCache(userId, weekStart, ChallengeCache.from(challenge));
     }
 
+    @Transactional
     public void evaluateChallenges(Long userId) {
         LocalDateTime weekStart = getStartOfWeek(LocalDateTime.now());
         LocalDateTime weekEnd = getEndOfWeek(weekStart);
@@ -99,9 +94,7 @@ public class ChallengeService {
             }
         }
 
-        challenge.setRemainedSeconds(calculateRemainedAt(weekStart).getSeconds());
         challengeRepository.save(challenge);
-        challengeCacheService.updateCache(userId, weekStart, ChallengeCache.from(challenge));
     }
 
     private LocalDateTime getStartOfWeek(LocalDateTime dateTime) {
@@ -118,19 +111,11 @@ public class ChallengeService {
         Challenge challenge = Challenge.builder()
                 .userId(userId)
                 .startedAt(weekStart)
-                .remainedSeconds(calculateRemainedAt(weekStart).getSeconds())
                 .hobbyShowOffPoint(ChallengeDefaults.ZERO)
                 .hobbyRoutinerPoint(ChallengeDefaults.ZERO)
                 .hobbyRichPoint(ChallengeDefaults.ZERO)
                 .build();
 
         return challengeRepository.save(challenge);
-    }
-
-    private Duration calculateRemainedAt(LocalDateTime weekStart) {
-        LocalDateTime weekEnd = getEndOfWeek(weekStart);
-        LocalDateTime now = LocalDateTime.now();
-
-        return Duration.between(now, weekEnd);
     }
 }
