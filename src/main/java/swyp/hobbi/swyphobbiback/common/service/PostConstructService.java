@@ -12,6 +12,6 @@ public class PostConstructService {
 
     @PostConstruct
     public void init() {
-
+        postConstructRepository.insertHobbyTag();
     }
 }
