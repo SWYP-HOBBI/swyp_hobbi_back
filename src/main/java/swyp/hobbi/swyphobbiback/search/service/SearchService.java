@@ -34,6 +34,7 @@ public class SearchService {
         String titleAndContent = request.getTitleAndContent();
         List<String> hobbyTags = request.getHobbyTags();
         String mbti = request.getMbti();
+        String searchWord = request.getTitleAndContent();
 
         List<Long> hobbyTagIds = searchRepository.findHobbyTagIdsByHobbyTagNames(hobbyTags);
         if(hobbyTagIds.isEmpty()) {
@@ -62,7 +63,7 @@ public class SearchService {
                     Long likeCount = likeCountMap.getOrDefault(post.getPostId(), 0L);
                     Integer userLevel = userLevelMap.getOrDefault(post.getUser().getUserId(), 1);
 
-                    return SearchResponse.of(post, commentCount, likeCount, userLevel);
+                    return SearchResponse.of(post, searchWord, commentCount, likeCount, userLevel);
                 })
                 .toList();
     }
@@ -72,6 +73,7 @@ public class SearchService {
         String author = request.getAuthor();
         List<String> hobbyTags = request.getHobbyTags();
         String mbti = request.getMbti();
+        String searchWord = request.getAuthor();
 
         List<Long> hobbyTagIds = searchRepository.findHobbyTagIdsByHobbyTagNames(hobbyTags);
         if(hobbyTagIds.isEmpty()) {
@@ -100,7 +102,7 @@ public class SearchService {
                     Long likeCount = likeCountMap.getOrDefault(post.getPostId(), 0L);
                     Integer userLevel = userLevelMap.getOrDefault(post.getUser().getUserId(), 1);
 
-                    return SearchResponse.of(post, commentCount, likeCount, userLevel);
+                    return SearchResponse.of(post, searchWord, commentCount, likeCount, userLevel);
                 })
                 .toList();
     }

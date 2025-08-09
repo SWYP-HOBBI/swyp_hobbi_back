@@ -17,13 +17,14 @@ public class SearchResponse {
     private String content;
     private List<String> postImageUrls;
     private List<String> postHobbyTags;
+    private String searchWord;
     private Long commentCount;
     private Long likeCount;
     private Integer userLevel;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static SearchResponse of(Post post, Long commentCount, Long likeCount, Integer userLevel) {
+    public static SearchResponse of(Post post, String searchWord, Long commentCount, Long likeCount, Integer userLevel) {
         SearchResponse response = new SearchResponse();
         response.postId = post.getPostId();
         response.nickname = post.getUser().getNickname();
@@ -37,6 +38,7 @@ public class SearchResponse {
         response.postHobbyTags = post.getPostHobbyTags().stream()
                 .map(postHobbyTag -> postHobbyTag.getHobbyTag().getHobbyTagName())
                 .toList();
+        response.searchWord = searchWord;
         response.commentCount = commentCount == null ? 0L : commentCount;
         response.likeCount = likeCount == null ? 0L : likeCount;
         response.userLevel = userLevel;
