@@ -61,4 +61,17 @@ public interface PostRepository extends JpaRepository<Post, Long>{
             ORDER BY p.postId DESC
             """)
     List<Post> findPostWithHobbyAndUser(@Param("postIds") List<Long> postIds);
+
+    @Query("SELECT p " +
+            "FROM Post p " +
+            "WHERE p.user.userId = :userId " +
+            "ORDER BY p.postId DESC")
+    List<Post> findTopByUserId(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("SELECT p " +
+            "FROM Post p " +
+            "WHERE p.user.userId = :userId " +
+            "AND p.postId < :lastPostId " +
+            "ORDER BY p.postId DESC")
+    List<Post> findNextByUserId(@Param("userId") Long userId, @Param("lastPostId") Long lastPostId, Pageable pageable);
 }
