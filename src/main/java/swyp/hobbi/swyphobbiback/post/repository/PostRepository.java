@@ -61,36 +61,4 @@ public interface PostRepository extends JpaRepository<Post, Long>{
             ORDER BY p.postId DESC
             """)
     List<Post> findPostWithHobbyAndUser(@Param("postIds") List<Long> postIds);
-
-    // 처음 페이지 (lastPostId 없음)
-    @Query("SELECT p " +
-            "FROM Post p " +
-            "WHERE p.user.userId = :userId " +
-            "ORDER BY p.postId DESC")
-    List<Post> findTopByUserId(@Param("userId") Long userId, Pageable pageable);
-
-    // 다음 페이지 (lastPostId 기준으로 커서 이동)
-    @Query("SELECT p " +
-            "FROM Post p " +
-            "WHERE p.user.userId = :userId " +
-            "AND p.postId < :lastPostId " +
-            "ORDER BY p.postId DESC")
-    List<Post> findNextByUserId(@Param("userId") Long userId, @Param("lastPostId") Long lastPostId, Pageable pageable);
-
-    @Query("SELECT DISTINCT p FROM Post p " +
-            "JOIN p.user u " +
-            "LEFT JOIN p.postHobbyTags pht " +
-            "LEFT JOIN pht.hobbyTag ht " +
-            "WHERE (:titleContent IS NULL OR p.postTitle LIKE CONCAT(:titleContent, '%') OR p.postContent LIKE CONCAT(:titleContent, '%')) " +
-            "AND (:nickname IS NULL OR u.nickname LIKE %:nickname%) " +
-            "AND (:mbti IS NULL OR u.mbti LIKE %:mbti%) " +
-            "AND (:tagNames IS NULL OR ht.hobbyTagName IN :tagNames)")
-    Page<Post> searchPosts(
-            @Param("titleContent") String titleContent,
-            @Param("nickname") String nickname,
-            @Param("mbti") String mbti,
-            @Param("tagNames") List<String> tagNames,
-            Pageable pageable
-    );
-
 }
