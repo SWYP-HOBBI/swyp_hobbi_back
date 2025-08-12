@@ -15,10 +15,10 @@ public interface SearchRepository extends JpaRepository<Post, Long> {
         FROM post AS p
         JOIN post_hobby_tag AS pht ON p.post_id = pht.post_id
         JOIN user AS u ON p.user_id = u.user_id
-        WHERE p.post_title LIKE IF(:title IS NULL, p.post_title, :title)
-          AND p.post_content LIKE IF(:content IS NULL, p.post_content, :content)
-          AND u.mbti LIKE IF(:mbti IS NULL, u.mbti, :mbti)
-          AND IF(:tagIds IS NULL, 1 = 1, pht.hobby_tag_id IN(:tagIds))
+        WHERE (:title IS NULL OR p.post_title LIKE :title)
+          AND (:content IS NULL OR p.post_content LIKE :content)
+          AND (:mbti IS NULL OR u.mbti LIKE :mbti)
+          AND (:tagIds IS NULL OR pht.hobby_tag_id IN(:tagIds))
           AND p.post_id < :lastId
         ORDER BY p.post_id DESC
         LIMIT :limit
@@ -37,10 +37,10 @@ public interface SearchRepository extends JpaRepository<Post, Long> {
         FROM post AS p
         JOIN post_hobby_tag AS pht ON p.post_id = pht.post_id
         JOIN user AS u ON p.user_id = u.user_id
-        WHERE p.post_title LIKE IF(:title IS NULL, p.post_title, :title)
-          AND p.post_content LIKE IF(:content IS NULL, p.post_content, :content)
-          AND u.mbti LIKE IF(:mbti IS NULL, u.mbti, :mbti)
-          AND IF(:tagIds IS NULL, 1 = 1, pht.hobby_tag_id IN(:tagIds))
+        WHERE (:title IS NULL OR p.post_title LIKE :title)
+          AND (:content IS NULL OR p.post_content LIKE :content)
+          AND (:mbti IS NULL OR u.mbti LIKE :mbti)
+          AND (:tagIds IS NULL OR pht.hobby_tag_id IN(:tagIds))
         ORDER BY p.post_id DESC
         LIMIT :limit
     """, nativeQuery = true)
@@ -57,9 +57,9 @@ public interface SearchRepository extends JpaRepository<Post, Long> {
         FROM post AS p
         JOIN post_hobby_tag AS pht ON p.post_id = pht.post_id
         JOIN user AS u ON p.user_id = u.user_id
-        WHERE u.nickname LIKE IF(:author IS NULL, u.nickname, :author)
-          AND u.mbti LIKE IF(:mbti IS NULL, u.mbti, :mbti)
-          AND IF(:tagIds IS NULL, 1 = 1, pht.hobby_tag_id IN(:tagIds))
+        WHERE (:author IS NULL OR u.nickname LIKE :author)
+          AND (:mbti IS NULL OR u.mbti LIKE :mbti)
+          AND (:tagIds IS NULL OR pht.hobby_tag_id IN(:tagIds))
           AND p.post_id < :lastId
         ORDER BY p.post_id DESC
         LIMIT :limit
@@ -77,9 +77,9 @@ public interface SearchRepository extends JpaRepository<Post, Long> {
         FROM post AS p
         JOIN post_hobby_tag AS pht ON p.post_id = pht.post_id
         JOIN user AS u ON p.user_id = u.user_id
-        WHERE u.nickname LIKE IF(:author IS NULL, u.nickname, :author)
-          AND u.mbti LIKE IF(:mbti IS NULL, u.mbti, :mbti)
-          AND IF(:tagIds IS NULL, 1 = 1, pht.hobby_tag_id IN(:tagIds))
+        WHERE (:author IS NULL OR u.nickname LIKE :author)
+          AND (:mbti IS NULL OR u.mbti LIKE :mbti)
+          AND (:tagIds IS NULL OR pht.hobby_tag_id IN(:tagIds))
         ORDER BY p.post_id DESC
         LIMIT :limit
     """,  nativeQuery = true)
