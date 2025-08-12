@@ -109,7 +109,6 @@ public class SearchService {
 
     private String getLetterWithWildCard(String letter) {
         StringBuilder letterWithWildCard = new StringBuilder();
-        letterWithWildCard.append("%");
         letterWithWildCard.append(letter);
         letterWithWildCard.append("%");
         return letterWithWildCard.toString();
