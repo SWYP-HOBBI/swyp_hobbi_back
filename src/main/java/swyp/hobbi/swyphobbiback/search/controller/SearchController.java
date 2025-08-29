@@ -15,7 +15,7 @@ import java.util.List;
 public class SearchController {
     private final SearchService searchService;
 
-    @GetMapping("/title-content")
+    @PostMapping("/title-content")
     public ResponseEntity<List<SearchResponse>> getAllSearchForTitleAndContent(
             @RequestBody SearchRequest request,
             @RequestParam(value = "lastId", required = false) Long lastId,
@@ -25,7 +25,7 @@ public class SearchController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/author")
+    @PostMapping("/author")
     public ResponseEntity<List<SearchResponse>> getAllSearchForAuthor(
             @RequestBody SearchRequest request,
             @RequestParam(value = "lastId", required = false) Long lastId,
